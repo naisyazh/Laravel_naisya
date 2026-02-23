@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Login')</title>
 
-    {{-- CSS Purple --}}
     <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/css/vendor.bundle.base.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
@@ -21,12 +20,10 @@
                     <div class="col-lg-4 mx-auto">
                         <div class="auth-form-light text-left p-5">
 
-                            {{-- LOGO --}}
                             <div class="brand-logo text-center">
                                 <img src="{{ asset('assets/images/logo.svg') }}" alt="logo">
                             </div>
 
-                            {{-- ISI FORM --}}
                             @yield('content')
 
                         </div>

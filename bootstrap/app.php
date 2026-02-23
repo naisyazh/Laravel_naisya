@@ -12,12 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-   ->withMiddleware(function (Middleware $middleware) {
+    ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            // Sekarang Anda cukup menuliskan nama class-nya saja
             'admin' => AdminMiddleware::class,
             'user'  => UserMiddleware::class,
         ]);
+        $middleware->redirectTo(
+            guests: '/login',           
+            users: '/otp-verification' 
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

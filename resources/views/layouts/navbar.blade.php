@@ -28,7 +28,6 @@
         </a>
         <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
           
-          {{-- TOMBOL LOGOUT --}}
           <a class="dropdown-item" href="{{ route('logout') }}"
              onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <i class="mdi mdi-logout me-2 text-primary"></i> Signout

@@ -11,22 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Tabel Users dengan tambahan kolom OTP
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('otp', 6)->nullable(); // Menambahkan kolom OTP dari modul terbaru
             $table->rememberToken();
             $table->timestamps();
         });
 
+        // Tabel untuk fitur Reset Password
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
+        // Tabel untuk fitur Session (agar login lebih stabil)
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();

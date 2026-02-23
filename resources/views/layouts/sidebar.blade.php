@@ -1,6 +1,6 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
   <ul class="nav">
-    {{-- PROFIL USER DI SIDEBAR --}}
+    {{-- Profil User --}}
     <li class="nav-item nav-profile">
       <a href="#" class="nav-link">
         <div class="nav-profile-image">
@@ -15,48 +15,65 @@
       </a>
     </li>
 
-    {{-- MENU DASHBOARD --}}
+    {{-- Menu Dashboard --}}
     <li class="nav-item {{ Request::is('dashboard') ? 'active' : '' }}">
-      <a class="nav-link" href="{{ route('dashboard') }}">
+      <a class="nav-link" href="{{ route('otp.dashboard') }}">
         <span class="menu-title">Dashboard</span>
-        <i class="mdi mdi-home menu-icon"></i>
+        <i class="mdi mdi-home menu-icon text-primary"></i>
       </a>
     </li>
-    
-    {{-- MENU KATEGORI (HANYA ADMIN) --}}
+
+    {{-- Menu Master Data (Buku & Kategori) --}}
     @if(Auth::check() && Auth::user()->role == 'admin')
     <li class="nav-item {{ Request::is('kategori*') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('kategori.index') }}">
         <span class="menu-title">Master Kategori</span>
-        <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+        <i class="mdi mdi-format-list-bulleted menu-icon text-success"></i>
       </a>
     </li>
     @endif
 
-    {{-- MENU BUKU (SEMUA USER) --}}
     <li class="nav-item {{ Request::is('buku*') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('buku.index') }}">
         <span class="menu-title">Koleksi Buku</span>
-        <i class="mdi mdi-book-open-variant menu-icon"></i>
+        <i class="mdi mdi-book-open-variant menu-icon text-info"></i>
       </a>
     </li>
 
-    {{-- ========================================= --}}
-    {{-- TOMBOL LOGOUT (PENAMBAHAN BARU) --}}
-    {{-- ========================================= --}}
+    {{-- PEMBATAS (Heading Menu Baru) --}}
     <li class="nav-item">
+      <div class="sidebar-heading" style="padding: 15px 15px 5px 25px; font-size: 11px; font-weight: bold; color: #afafaf;">
+        DOKUMEN EKSKLUSIF
+      </div>
+    </li>
+
+    {{-- Menu Sertifikat --}}
+    <li class="nav-item {{ Request::is('sertifikat*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('otp.sertifikat') }}">
+        <span class="menu-title">Sertifikat</span>
+        <i class="mdi mdi-certificate menu-icon text-danger"></i>
+      </a>
+    </li>
+
+    {{-- Menu Undangan --}}
+    <li class="nav-item {{ Request::is('undangan*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('otp.undangan') }}">
+        <span class="menu-title">Undangan</span>
+        <i class="mdi mdi-email-seal menu-icon text-warning"></i>
+      </a>
+    </li>
+
+    {{-- Menu Logout --}}
+    <li class="nav-item mt-3">
       <a class="nav-link" href="{{ route('logout') }}" 
          onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
         <span class="menu-title text-danger">Logout</span>
         <i class="mdi mdi-power menu-icon text-danger"></i>
       </a>
     </li>
-
   </ul>
 </nav>
 
-{{-- FORM HIDDEN UNTUK PROSES LOGOUT --}}
-{{-- Ditaruh di luar UL tapi masih di dalam file agar rapi --}}
 <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST" class="d-none">
     @csrf
 </form>
