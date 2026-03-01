@@ -32,31 +32,39 @@
                     </a>
                 </div>
 
-                <div class="position-relative cert-group">
-                    <img src="{{ asset('Sertifikat.png') }}" 
-                         alt="Sertifikat" 
-                         class="w-100 rounded border shadow-sm">
-                    
-                    <div class="cert-overlay no-print">
-                        <button onclick="window.open('{{ asset('Sertifikat.png') }}', '_blank')" class="btn btn-light btn-rounded font-weight-bold shadow">
-                            Lihat Gambar Penuh
-                        </button>
+                @if($document)
+                    <div class="position-relative cert-group">
+                        <img src="{{ asset('storage/' . $document->file_path) }}" 
+                             alt="Sertifikat" 
+                             class="w-100 rounded border shadow-sm">
+                        
+                        <div class="cert-overlay no-print">
+                            <button onclick="window.open('{{ asset('storage/' . $document->file_path) }}', '_blank')" class="btn btn-light btn-rounded font-weight-bold shadow">
+                                Lihat Gambar Penuh
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="mt-5 text-center no-print">
-                    <div class="btn-group shadow-sm">
-                        <button onclick="window.print()" class="btn btn-gradient-primary btn-lg font-weight-bold px-5">
-                            <i class="mdi mdi-printer mr-2"></i> Simpan / Cetak PDF
-                        </button>
-                        <a href="{{ asset('Sertifikat.png') }}" download="Sertifikat_NZ.png" class="btn btn-outline-secondary btn-lg font-weight-bold px-4">
-                            Unduh Gambar
-                        </a>
+                    <div class="mt-5 text-center no-print">
+                        <div class="btn-group shadow-sm">
+                            <button onclick="window.print()" class="btn btn-gradient-primary btn-lg font-weight-bold px-5">
+                                <i class="mdi mdi-printer mr-2"></i> Simpan / Cetak PDF
+                            </button>
+                            <a href="{{ asset('storage/' . $document->file_path) }}" download="Sertifikat_{{ Auth::user()->name }}.png" class="btn btn-outline-secondary btn-lg font-weight-bold px-4">
+                                Unduh Gambar
+                            </a>
+                        </div>
+                        <p class="mt-4 text-muted small font-italic">
+                            Sertifikat ini diterbitkan secara resmi untuk <strong>{{ Auth::user()->name }}</strong>
+                        </p>
                     </div>
-                    <p class="mt-4 text-muted small font-italic">
-                        Sertifikat ini diterbitkan secara resmi untuk <strong>{{ session('user_name', 'Naisya Zahra') }}</strong>
-                    </p>
-                </div>
+                @else
+                    <div class="text-center py-5">
+                        <i class="mdi mdi-alert-circle-outline text-warning display-1"></i>
+                        <h3 class="mt-3">Sertifikat Belum Tersedia</h3>
+                        <p class="text-muted">Admin belum mengunggah sertifikat untuk akun Anda.</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

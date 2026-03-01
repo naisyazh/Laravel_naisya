@@ -15,48 +15,54 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Buat User Admin Utama (Untuk tes login & OTP)
+        // --- 1. DATA USER (ADMIN) ---
+        
         User::create([
-            'name' => 'Abhi Svariyu',
+            'name' => 'Abhi Svariyu (Admin)',
             'email' => 'abhizvariyu@gmail.com',
             'password' => Hash::make('password123'),
             'role' => 'admin',
-            'otp' => null,
         ]);
 
-        // 2. Tambahkan Email Naisya Zahra
         User::create([
-            'name' => 'Naisya Zahra',
+            'name' => 'Naisya Zahra (Admin)',
             'email' => 'naisyaazaraa@gmail.com',
             'password' => Hash::make('password123'),
             'role' => 'admin',
-            'otp' => null,
         ]);
 
-        // 3. Buat User Admin Tambahan
+        // --- 2. DATA USER (PEMERAN USER BIASA) ---
+        // Akun-akun ini yang akan menerima Sertifikat/Undangan dari Admin
+
         User::create([
-            'name' => 'Admin Perpus',
-            'email' => 'admin@mail.com',
+            'name' => 'Abhi Sleeping',
+            'email' => 'abhizsleeping@gmail.com',
             'password' => Hash::make('password123'),
-            'role' => 'admin',
-            'otp' => null,
+            'role' => 'user',
         ]);
 
-        // 4. Buat User Biasa
         User::create([
-            'name' => 'User Biasa',
+            'name' => 'Customer JualBeli',
+            'email' => 'jualbeli7920@gmail.com',
+            'password' => Hash::make('password123'),
+            'role' => 'user',
+        ]);
+
+        User::create([
+            'name' => 'User Testing',
             'email' => 'user@mail.com',
             'password' => Hash::make('password123'),
             'role' => 'user',
-            'otp' => null,
         ]);
 
-        // 5. Buat Kategori
+        // --- 3. DATA MASTER (KATEGORI) ---
+        
         $novel = Kategori::create(['nama_kategori' => 'Novel']);
         $biografi = Kategori::create(['nama_kategori' => 'Biografi']);
         $komik = Kategori::create(['nama_kategori' => 'Komik']);
 
-        // 6. Buat Data Buku
+        // --- 4. DATA BUKU ---
+        
         Buku::create([
             'idkategori' => $novel->idkategori,
             'kode' => 'NV-01',

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->timestamp('expired_at');
             $table->timestamps();
 
-            $table->unique('email'); // Memastikan satu email hanya punya satu baris OTP aktif
+            $table->unique('email'); 
         });
     }
 

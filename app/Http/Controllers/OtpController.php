@@ -37,23 +37,27 @@ class OtpController extends Controller
 
     // 2. Fungsi Internal untuk Generate dan Kirim (Biar rapi)
     private function generateAndSendOtp($user)
-    {
-        $otp = rand(100000, 999999);
-        
-        // Simpan ke database menggunakan Query Builder
-        DB::table('users')
-            ->where('id', $user->id)
-            ->update(['otp' => $otp]);
+{
+    $otp = rand(100000, 999999);
+    
+    // Update ke DB dulu agar data siap
+    DB::table('users')->where('id', $user->id)->update(['otp' => $otp]);
 
-        // Kirim Email
+    try {
         Mail::raw(
-            "Kode keamanan Anda adalah: $otp. Segera masukkan kode ini untuk melanjutkan login ke Koleksi Buku.",
+            "Kode keamanan Anda adalah: $otp",
             function ($message) use ($user) {
-                $message->to($user->email)
-                        ->subject('Verifikasi OTP Login');
+                $message->to($user->email)->subject('Verifikasi OTP Login');
             }
         );
+    } catch (\Exception $e) {
+        // Jika internet mati, hapus OTP di DB agar user bisa kirim ulang nanti
+        DB::table('users')->where('id', $user->id)->update(['otp' => null]);
+        
+        // Redirect balik dengan pesan error yang ramah
+        return back()->withErrors(['otp' => 'Koneksi ke server email bermasalah. Pastikan internet Anda aktif.']);
     }
+}
 
     // 3. Tombol "Kirim Ulang OTP" di halaman verifikasi
     public function sendOtp(Request $request)
@@ -95,21 +99,34 @@ class OtpController extends Controller
     // --- PROTECTED MENUS (Dashboard, Sertifikat, Undangan) ---
 
     public function showDashboard()
-    {
-        if (!session('otp_verified')) return redirect()->route('otp.verify.form');
-        return view('otp.dashboard');
-    }
+{
+    if (!session('otp_verified')) return redirect()->route('otp.verify.form');
+    return view('otp.dashboard');
+}
 
-    public function showSertifikat()
-    {
-        if (!session('otp_verified')) return redirect()->route('otp.verify.form');
-        return view('otp.sertifikat');
-    }
+public function showSertifikat()
+{
+    if (!session('otp_verified')) return redirect()->route('otp.verify.form');
+    
+    // User hanya mengambil data miliknya sendiri
+    $document = DB::table('documents')
+                ->where('user_id', Auth::id())
+                ->where('type', 'sertifikat')
+                ->first();
 
-    public function showUndangan()
-    {
-        if (!session('otp_verified')) return redirect()->route('otp.verify.form');
-        $namaTamu = session('user_name');
-        return view('otp.undangan', compact('namaTamu'));
-    }
+    return view('otp.sertifikat', compact('document'));
+}
+
+public function showUndangan()
+{
+    if (!session('otp_verified')) return redirect()->route('otp.verify.form');
+
+    // User hanya mengambil data miliknya sendiri
+    $document = DB::table('documents')
+                ->where('user_id', Auth::id())
+                ->where('type', 'undangan')
+                ->first();
+
+    return view('otp.undangan', compact('document'));
+}
 }

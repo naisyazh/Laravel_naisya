@@ -23,6 +23,13 @@
         position: relative;
         overflow: hidden;
     }
+    .invitation-img {
+        width: 100%;
+        max-height: 700px;
+        object-fit: contain;
+        border-radius: 20px;
+        margin-bottom: 10px;
+    }
 </style>
 
 <div id="sakura-container"></div>
@@ -40,51 +47,24 @@
                 <h4 class="text-uppercase tracking-widest text-primary small font-weight-bold mb-4" style="letter-spacing: 0.5em;">Special Invitation</h4>
                 
                 <p class="font-playfair font-italic text-muted mb-2">Diberikan Kepada,</p>
-                <h1 class="font-pinyon display-3 text-dark mb-4">{{ $namaTamu }}</h1>
+                <h1 class="font-pinyon display-3 text-dark mb-4">{{ Auth::user()->name }}</h1>
 
-                <div class="mx-auto bg-primary mb-4" style="width: 60px; height: 1px; opacity: 0.3;"></div>
-
-                <h2 class="font-playfair h3 text-dark mb-3">Gala Dinner & Mentoring</h2>
-                <p class="text-muted mb-5">
-                    Sebagai bentuk apresiasi atas partisipasi Anda dalam <br>
-                    <span class="font-weight-bold text-danger text-uppercase">"Seminar Bisnis Hijab 2026"</span>
-                </p>
-
-                <div class="row mb-5">
-                    <div class="col-md-6 mb-3">
-                        <div class="bg-light p-4 rounded-lg border text-left">
-                            <p class="small text-primary font-weight-bold text-uppercase mb-2">Waktu & Tempat</p>
-                            <div class="small text-dark">
-                                <p class="mb-1">📅 Sabtu, 28 Feb 2026</p>
-                                <p class="mb-1">⏰ 19.00 WIB - Selesai</p>
-                                <p class="mb-0">📍 Grand Rose Ballroom</p>
-                            </div>
-                        </div>
+                @if($document)
+                    <div class="px-3">
+                        <img src="{{ asset('storage/' . $document->file_path) }}" class="invitation-img shadow-sm border">
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="bg-light p-4 rounded-lg border">
-                            <p class="small text-primary font-weight-bold text-uppercase mb-2">Countdown</p>
-                            <div class="d-flex justify-content-around">
-                                <div><span class="d-block h4 font-weight-bold mb-0">07</span><span class="small text-muted">Hari</span></div>
-                                <div><span class="d-block h4 font-weight-bold mb-0">12</span><span class="small text-muted">Jam</span></div>
-                                <div><span class="d-block h4 font-weight-bold mb-0">45</span><span class="small text-muted">Mnt</span></div>
-                            </div>
-                        </div>
+                    
+                    <div class="mt-4 no-print">
+                         <a href="{{ asset('storage/' . $document->file_path) }}" download="Undangan_{{ Auth::user()->name }}.png" class="btn btn-gradient-primary btn-lg font-weight-bold">
+                            <i class="mdi mdi-download mr-2"></i> UNDUH UNDANGAN
+                        </a>
                     </div>
-                </div>
-
-                <div class="d-flex flex-column flex-md-row align-items-center justify-content-between border-top pt-4">
-                    <div class="d-flex align-items-center mb-3 mb-md-0">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=GrandRoseBallroom" class="img-thumbnail" style="width: 70px;">
-                        <div class="text-left ml-3">
-                            <p class="small font-weight-bold text-muted text-uppercase mb-0">Petunjuk Lokasi</p>
-                            <p class="small text-muted mb-0">Scan Maps</p>
-                        </div>
+                @else
+                    <div class="py-5">
+                        <i class="mdi mdi-email-outline text-muted display-1"></i>
+                        <p class="mt-3 text-muted">Belum ada undangan khusus untuk Anda saat ini.</p>
                     </div>
-                    <div>
-                        <a href="#" class="btn btn-gradient-danger btn-lg font-weight-bold mr-2">KONFIRMASI RSVP</a>
-                    </div>
-                </div>
+                @endif
             </div>
             <div class="p-1 bg-gradient-primary"></div>
         </div>
