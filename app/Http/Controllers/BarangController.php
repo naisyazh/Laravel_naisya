@@ -21,31 +21,29 @@ class BarangController extends Controller
             'harga' => 'required|numeric',
         ]);
 
-        Barang::create($request->all());
+        Barang::create($request->only(['nama','harga']));
         return redirect()->back()->with('success', 'Buku berhasil ditambahkan!');
     }
 
     public function edit($id)
-{
-    $barang = Barang::findOrFail($id);
-    return response()->json($barang);
-}
+    {
+        $barang = Barang::findOrFail($id);
+        return response()->json($barang);
+    }
 
-public function update(Request $request, $id)
-{
-    $request->validate([
-        'nama' => 'required|max:50',
-        'harga' => 'required|numeric',
-    ]);
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nama' => 'required|max:50',
+            'harga' => 'required|numeric',
+        ]);
 
-    $barang = Barang::findOrFail($id);
-    $barang->update([
-        'nama' => $request->nama,
-        'harga' => $request->harga,
-    ]);
+        $barang = Barang::findOrFail($id);
+        $barang->update($request->only(['nama','harga']));
 
-    return redirect()->back()->with('success', 'Data buku berhasil diperbarui!');
-}
+        return redirect()->back()->with('success', 'Data buku berhasil diperbarui!');
+    }
+
     public function destroy($id)
     {
         $barang = Barang::findOrFail($id);
@@ -53,17 +51,29 @@ public function update(Request $request, $id)
 
         return redirect()->back()->with('success', 'Buku berhasil dihapus!');
     }
-
-    public function cetakLabel(Request $request)
-    {
-        $ids = $request->selected_ids;
-        if (!$ids) return back()->with('error', 'Pilih barang dulu!');
-
-        $barangs = Barang::whereIn('id_barang', $ids)->get();
-        $skip = (($request->y - 1) * 5) + ($request->x - 1);
-
-        $pdf = Pdf::loadView('barang.cetak_pdf', compact('barangs', 'skip'));
-        return $pdf->setPaper('a4', 'portrait')->stream('label-umkm.pdf');
-    }
     
+   public function cetakLabel(Request $request)
+{
+    $request->validate([
+        'selected_ids' => 'required|array',
+        'x' => 'required|numeric',
+        'y' => 'required|numeric',
+    ]);
+
+    $barangs = Barang::whereIn('id_barang', $request->selected_ids)->get();
+
+    if ($barangs->isEmpty()) {
+        return back()->with('error', 'Data tidak ditemukan.');
+    }
+
+    $skip = (($request->y - 1) * 5) + ($request->x - 1);
+
+    $pdf = Pdf::loadView('barang.cetak_pdf', [
+        'barangs' => $barangs,
+        'skip' => $skip
+    ]);
+
+    return $pdf->setPaper('a4', 'portrait')
+               ->stream('label-harga.pdf');
+}
 }
