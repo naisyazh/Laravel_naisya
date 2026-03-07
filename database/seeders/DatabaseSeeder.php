@@ -30,7 +30,14 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123'),
             'role' => 'admin',
         ]);
+        User::create([
+            'name' => 'Hazel MpR (Admin)',
+            'email' => 'hazelmpr368@gmail.com',
+            'password' => Hash::make('password123'),
+            'role' => 'admin',
+        ]);
 
+        
         // --- 2. DATA USER (PEMERAN USER BIASA) ---
         // Akun-akun ini yang akan menerima Sertifikat/Undangan dari Admin
 

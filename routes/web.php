@@ -35,6 +35,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/undangan', [OtpController::class, 'showUndangan'])
         ->name('otp.undangan');
 
+    // Halaman tugas JS/jQuery (frontend only)
+    Route::view('/tugas-js', 'assignment')
+        ->name('assignment');
+
 
     Route::get('/kategori', [KategoriController::class, 'index'])
         ->name('kategori.index');
@@ -61,7 +65,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::resource('buku', BukuController::class)
             ->except(['index', 'show']);
-            
+
         Route::resource('documents', DocumentController::class);
     });
 });
