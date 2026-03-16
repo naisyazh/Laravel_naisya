@@ -7,6 +7,7 @@ use App\Http\Controllers\OtpController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\DocumentController;
 
 Route::get('/', function () {
@@ -35,9 +36,28 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/undangan', [OtpController::class, 'showUndangan'])
         ->name('otp.undangan');
 
-    // Halaman tugas JS/jQuery (frontend only)
-    Route::view('/tugas-js', 'assignment')
+    Route::get('/tugas-js', [AssignmentController::class, 'index'])
         ->name('assignment');
+
+    Route::prefix('tugas-js/api')->name('assignment.')->group(function () {
+        Route::get('/regions/provinces', [AssignmentController::class, 'provinces'])
+            ->name('regions.provinces');
+
+        Route::get('/regions/regencies', [AssignmentController::class, 'regencies'])
+            ->name('regions.regencies');
+
+        Route::get('/regions/districts', [AssignmentController::class, 'districts'])
+            ->name('regions.districts');
+
+        Route::get('/regions/villages', [AssignmentController::class, 'villages'])
+            ->name('regions.villages');
+
+        Route::get('/barang', [AssignmentController::class, 'lookupBarang'])
+            ->name('barang.lookup');
+
+        Route::post('/checkout', [AssignmentController::class, 'checkout'])
+            ->name('checkout');
+    });
 
 
     Route::get('/kategori', [KategoriController::class, 'index'])

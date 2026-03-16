@@ -49,7 +49,7 @@
         </li>
         <li class="nav-item {{ Request::is('tugas-js') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('assignment') }}">
-                <span class="menu-title">Tugas JS/jQuery</span>
+                <span class="menu-title">Modul AJAX & Axios</span>
                 <i class="mdi mdi-code-tags menu-icon text-warning"></i>
             </a>
         </li>
