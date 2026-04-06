@@ -17,7 +17,10 @@ class DocumentController extends Controller
     }
 
     public function create() {
-        $users = DB::table('users')->where('role', '!=', 'admin')->get();
+        $users = DB::table('users')
+            ->where('role', '!=', 'admin')
+            ->where('is_guest', false)
+            ->get();
         return view('admin.documents.create', compact('users'));
     }
 

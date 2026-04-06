@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -21,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'is_guest',
     ];
 
     /**
@@ -42,7 +45,28 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'is_guest' => 'boolean',
             'password' => 'hashed',
         ];
+    }
+
+    public function menus(): HasMany
+    {
+        return $this->hasMany(Barang::class, 'vendor_id');
+    }
+
+    public function customerOrders(): HasMany
+    {
+        return $this->hasMany(Penjualan::class, 'user_id');
+    }
+
+    public function vendorOrders(): HasMany
+    {
+        return $this->hasMany(Penjualan::class, 'vendor_id');
+    }
+
+    public function isVendor(): bool
+    {
+        return $this->role === 'admin';
     }
 }

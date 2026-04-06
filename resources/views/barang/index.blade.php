@@ -5,29 +5,29 @@
     <div class="col-lg-12 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Manajemen Tag Harga Buku</h4>
+                <h4 class="card-title">Master Buku Toko</h4>
                 <button type="button" class="btn btn-gradient-primary btn-fw mb-3"
                         data-bs-toggle="modal" data-bs-target="#modalTambah">
-                    <i class="mdi mdi-plus"></i> Tambah Buku
+                    <i class="mdi mdi-plus"></i> Tambah Buku Toko
                 </button>
                 <form action="{{ route('barang.cetak') }}" method="POST">
                     @csrf
 
                     <div class="row mb-3 bg-light p-3 rounded">
                         <div class="col-md-3">
-                            <label>Mulai Kolom (X)</label>
+                            <label>Mulai Kolom Label (X)</label>
                             <input type="number" name="x" class="form-control"
                                    min="1" max="5" value="1" required>
                         </div>
                         <div class="col-md-3">
-                            <label>Mulai Baris (Y)</label>
+                            <label>Mulai Baris Label (Y)</label>
                             <input type="number" name="y" class="form-control"
                                    min="1" max="8" value="1" required>
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
                             <button type="submit"
                                     class="btn btn-gradient-danger">
-                                Cetak Label Terpilih
+                                Cetak Label Harga Buku
                             </button>
                         </div>
                     </div>
@@ -39,9 +39,10 @@
                                     <th>
                                         <input type="checkbox" id="selectAll">
                                     </th>
-                                    <th>ID Buku</th>
+                                    <th>Kode Buku</th>
                                     <th>Judul Buku</th>
                                     <th>Harga</th>
+                                    <th>Status</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -57,6 +58,11 @@
                                     <td>{{ $b->nama }}</td>
                                     <td>
                                         Rp {{ number_format($b->harga, 0, ',', '.') }}
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ $b->is_active ? 'badge-gradient-success' : 'badge-gradient-secondary' }}">
+                                            {{ $b->is_active ? 'Aktif Dijual' : 'Tidak Dijual' }}
+                                        </span>
                                     </td>
 
                                     <td>
@@ -97,7 +103,7 @@
         <form action="{{ route('barang.store') }}" method="POST" class="modal-content">
             @csrf
             <div class="modal-header">
-                <h5 class="modal-title">Tambah Buku</h5>
+                <h5 class="modal-title">Tambah Buku Toko</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -108,6 +114,12 @@
                 <div class="form-group">
                     <label>Harga</label>
                     <input type="number" name="harga" class="form-control" required>
+                </div>
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" name="is_active" value="1" id="create_is_active" checked>
+                    <label class="form-check-label" for="create_is_active">
+                        Buku aktif dan bisa di-checkout user
+                    </label>
                 </div>
             </div>
             <div class="modal-footer">
@@ -123,7 +135,7 @@
             @csrf
             @method('PUT')
             <div class="modal-header">
-                <h5 class="modal-title">Edit Buku</h5>
+                <h5 class="modal-title">Edit Buku Toko</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -132,6 +144,13 @@
 
                 <input type="number" name="harga" id="edit_harga"
                        class="form-control" required>
+
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" name="is_active" value="1" id="edit_is_active">
+                    <label class="form-check-label" for="edit_is_active">
+                        Buku aktif dan tampil di halaman checkout user
+                    </label>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-primary">
@@ -158,6 +177,7 @@ $(document).ready(function(){
         $.get('/barang/' + id + '/edit', function(data){
             $('#edit_nama').val(data.nama);
             $('#edit_harga').val(data.harga);
+            $('#edit_is_active').prop('checked', !!data.is_active);
             $('#formEdit').attr('action', '/barang/' + id);
             $('#modalEdit').modal('show');
         });
@@ -166,7 +186,7 @@ $(document).ready(function(){
     $('.btn-delete').click(function(){
         let id = $(this).data('id');
 
-        if(confirm('Hapus buku ini?')){
+        if(confirm('Hapus buku ini dari toko?')){
             $('#deleteForm')
                 .attr('action', '/barang/' + id)
                 .submit();

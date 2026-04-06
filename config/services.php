@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    'midtrans' => [
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'client_key' => env('MIDTRANS_CLIENT_KEY'),
+        'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
+        'enabled_payments' => env('MIDTRANS_ENABLED_PAYMENTS', 'qris'),
+    ],
+
+    'payment_demo' => [
+        'enabled' => env('PAYMENT_DEMO_MANUAL_ENABLED', false),
+        'bank_name' => env('PAYMENT_DEMO_BANK_NAME', 'Bank Demo'),
+        'account_number' => env('PAYMENT_DEMO_ACCOUNT_NUMBER', '1234567890'),
+        'account_name' => env('PAYMENT_DEMO_ACCOUNT_NAME', 'Nama Pemilik Rekening'),
+        'note' => env('PAYMENT_DEMO_NOTE', 'Transfer demo untuk presentasi tugas.'),
+    ],
+
 ];

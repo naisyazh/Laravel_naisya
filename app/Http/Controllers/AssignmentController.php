@@ -8,7 +8,6 @@ use App\Services\WilayahCsvService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -137,7 +136,14 @@ class AssignmentController extends Controller
             $penjualan = Penjualan::create([
                 'nomor_transaksi' => $this->generateTransactionNumber(),
                 'user_id' => $request->user()?->id,
+                'customer_name' => $request->user()?->name,
+                'customer_email' => $request->user()?->email,
                 'total' => $total,
+                'payment_status' => 'paid',
+                'payment_type' => 'manual',
+                'midtrans_transaction_status' => 'manual',
+                'status_message' => 'Checkout modul assignment disimpan sebagai transaksi manual.',
+                'paid_at' => now(),
             ]);
 
             $penjualan->items()->createMany($itemPayloads);
@@ -182,10 +188,6 @@ class AssignmentController extends Controller
 
     private function generateTransactionNumber(): string
     {
-        do {
-            $number = 'TRX-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(4));
-        } while (Penjualan::query()->where('nomor_transaksi', $number)->exists());
-
-        return $number;
+        return Penjualan::generateTransactionNumber();
     }
 }

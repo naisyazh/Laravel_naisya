@@ -47,12 +47,6 @@
                 <i class="mdi mdi-home menu-icon text-primary"></i>
             </a>
         </li>
-        <li class="nav-item {{ Request::is('tugas-js') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('assignment') }}">
-                <span class="menu-title">Modul AJAX & Axios</span>
-                <i class="mdi mdi-code-tags menu-icon text-warning"></i>
-            </a>
-        </li>
         @if (Auth::check() && Auth::user()->role == 'admin')
             <li class="nav-item">
                 <div class="sidebar-heading"
@@ -81,11 +75,29 @@
         </li>
         <li class="nav-item {{ Request::is('barang*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('barang.index') }}">
-                <span class="menu-title">Tag Harga UMKM</span>
+                <span class="menu-title">Master Buku Toko</span>
                 <i class="mdi mdi-tag-multiple menu-icon text-primary"></i>
             </a>
         </li>
         @if (Auth::check() && Auth::user()->role == 'user')
+            <li class="nav-item">
+                <div class="sidebar-heading"
+                    style="padding: 15px 15px 5px 25px; font-size: 11px; font-weight: bold; color: #afafaf;">
+                    FITUR USER
+                </div>
+            </li>
+            <li class="nav-item {{ Request::is('toko-buku*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('toko-buku.index') }}">
+                    <span class="menu-title">Checkout Toko Buku</span>
+                    <i class="mdi mdi-cart menu-icon text-warning"></i>
+                </a>
+            </li>
+            <li class="nav-item {{ Request::is('tugas-js') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('assignment') }}">
+                    <span class="menu-title">Modul AJAX & Axios</span>
+                    <i class="mdi mdi-code-tags menu-icon text-primary"></i>
+                </a>
+            </li>
             <li class="nav-item">
                 <div class="sidebar-heading"
                     style="padding: 15px 15px 5px 25px; font-size: 11px; font-weight: bold; color: #afafaf;">

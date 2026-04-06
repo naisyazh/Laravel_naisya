@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\KategoriController;
@@ -9,10 +10,17 @@ use App\Http\Controllers\BukuController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\MidtransNotificationController;
+use App\Http\Controllers\TokoController;
+use App\Http\Controllers\VendorOrderController;
 
 Route::get('/', function () {
     return view('auth.login');
 });
+
+Route::post('/payments/midtrans/notification', [MidtransNotificationController::class, 'handle'])
+    ->withoutMiddleware([ValidateCsrfToken::class])
+    ->name('payments.midtrans.notification');
 
 Auth::routes(['register' => false]);
 
@@ -66,18 +74,48 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/buku', [BukuController::class, 'index'])
         ->name('buku.index');
 
-    Route::get('/barang', [BarangController::class, 'index'])
-        ->name('barang.index');
+    Route::middleware(['user'])->group(function () {
+        Route::get('/toko-buku', [TokoController::class, 'index'])
+            ->name('toko-buku.index');
 
+        Route::get('/toko-buku/api/buku', [TokoController::class, 'lookup'])
+            ->name('toko-buku.lookup');
 
-    Route::post('/cetak-label-barang', [BarangController::class, 'cetakLabel'])
-        ->name('barang.cetak');
+        Route::post('/toko-buku/checkout', [TokoController::class, 'checkout'])
+            ->name('toko-buku.checkout');
 
+        Route::get('/toko-buku/orders/{penjualan:nomor_transaksi}', [TokoController::class, 'show'])
+            ->name('toko-buku.orders.show');
+
+        Route::post('/toko-buku/orders/{penjualan:nomor_transaksi}/confirm-demo-payment', [TokoController::class, 'confirmDemoPayment'])
+            ->name('toko-buku.orders.confirm-demo-payment');
+
+        Route::post('/toko-buku/orders/{penjualan:nomor_transaksi}/refresh-status', [TokoController::class, 'refreshStatus'])
+            ->name('toko-buku.orders.refresh');
+    });
 
     Route::middleware(['admin'])->group(function () {
+        Route::get('/barang', [BarangController::class, 'index'])
+            ->name('barang.index');
+
+        Route::post('/cetak-label-barang', [BarangController::class, 'cetakLabel'])
+            ->name('barang.cetak');
+
+        Route::get('/vendor/orders', [VendorOrderController::class, 'index'])
+            ->name('vendor.orders.index');
+
+        Route::get('/vendor/orders/{penjualan:nomor_transaksi}', [VendorOrderController::class, 'show'])
+            ->name('vendor.orders.show');
+
+        Route::post('/vendor/orders/{penjualan:nomor_transaksi}/refresh-status', [VendorOrderController::class, 'refreshStatus'])
+            ->name('vendor.orders.refresh');
+
+        Route::post('/vendor/orders/{penjualan:nomor_transaksi}/mark-paid', [VendorOrderController::class, 'markPaid'])
+            ->name('vendor.orders.mark-paid');
+
 
         Route::resource('barang', BarangController::class)
-            ->except(['index']);
+            ->except(['index', 'create', 'show']);
 
         Route::resource('kategori', KategoriController::class)
             ->except(['index', 'show']);
@@ -86,6 +124,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('buku', BukuController::class)
             ->except(['index', 'show']);
 
-        Route::resource('documents', DocumentController::class);
+        Route::resource('documents', DocumentController::class)
+            ->only(['index', 'create', 'store', 'destroy']);
     });
 });

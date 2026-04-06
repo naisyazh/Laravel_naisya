@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Barang;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Str;
 
 class BarangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $barangs = Barang::all();
+        $barangs = Barang::query()
+            ->where('vendor_id', $request->user()->id)
+            ->orderBy('nama')
+            ->get();
+
         return view('barang.index', compact('barangs'));
     }
 
@@ -20,12 +23,15 @@ class BarangController extends Controller
         $request->validate([
             'nama' => 'required|max:50',
             'harga' => 'required|numeric',
+            'is_active' => 'nullable|boolean',
         ]);
 
         Barang::create([
             'id_barang' => $this->generateBarangId(),
             'nama' => $request->nama,
             'harga' => $request->harga,
+            'vendor_id' => $request->user()->id,
+            'is_active' => $request->boolean('is_active', true),
         ]);
 
         return redirect()->back()->with('success', 'Barang berhasil ditambahkan!');
@@ -33,7 +39,11 @@ class BarangController extends Controller
 
     public function edit($id)
     {
-        $barang = Barang::findOrFail($id);
+        $barang = Barang::query()
+            ->where('id_barang', $id)
+            ->where('vendor_id', request()->user()->id)
+            ->firstOrFail();
+
         return response()->json($barang);
     }
 
@@ -42,17 +52,30 @@ class BarangController extends Controller
         $request->validate([
             'nama' => 'required|max:50',
             'harga' => 'required|numeric',
+            'is_active' => 'nullable|boolean',
         ]);
 
-        $barang = Barang::findOrFail($id);
-        $barang->update($request->only(['nama','harga']));
+        $barang = Barang::query()
+            ->where('id_barang', $id)
+            ->where('vendor_id', $request->user()->id)
+            ->firstOrFail();
+
+        $barang->update([
+            'nama' => $request->nama,
+            'harga' => $request->harga,
+            'is_active' => $request->boolean('is_active'),
+        ]);
 
         return redirect()->back()->with('success', 'Data barang berhasil diperbarui!');
     }
 
     public function destroy($id)
     {
-        $barang = Barang::findOrFail($id);
+        $barang = Barang::query()
+            ->where('id_barang', $id)
+            ->where('vendor_id', request()->user()->id)
+            ->firstOrFail();
+
         $barang->delete();
 
         return redirect()->back()->with('success', 'Barang berhasil dihapus!');
@@ -66,7 +89,10 @@ class BarangController extends Controller
             'y' => 'required|numeric',
         ]);
 
-        $barangs = Barang::whereIn('id_barang', $request->selected_ids)->get();
+        $barangs = Barang::query()
+            ->where('vendor_id', $request->user()->id)
+            ->whereIn('id_barang', $request->selected_ids)
+            ->get();
 
         if ($barangs->isEmpty()) {
             return back()->with('error', 'Data tidak ditemukan.');
@@ -85,16 +111,19 @@ class BarangController extends Controller
 
     private function generateBarangId(): string
     {
-        $lastBarang = Barang::query()
-            ->orderByDesc('id_barang')
-            ->value('id_barang');
+        $lastNumber = Barang::query()
+            ->where('id_barang', 'like', 'BRG%')
+            ->pluck('id_barang')
+            ->map(function (string $idBarang) {
+                return (int) preg_replace('/\D/', '', $idBarang);
+            })
+            ->max() ?? 0;
 
-        if (! $lastBarang) {
-            return 'BRG00001';
-        }
+        do {
+            $lastNumber++;
+            $candidate = 'BRG' . str_pad((string) $lastNumber, 5, '0', STR_PAD_LEFT);
+        } while (Barang::query()->where('id_barang', $candidate)->exists());
 
-        $nextNumber = (int) Str::of($lastBarang)->replace('BRG', '')->toString() + 1;
-
-        return 'BRG' . str_pad((string) $nextNumber, 5, '0', STR_PAD_LEFT);
+        return $candidate;
     }
 }

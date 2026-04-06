@@ -68,13 +68,13 @@
     @else
     <div class="row">
         <div class="col-md-6 stretch-card grid-margin">
-            <a href="{{ route('otp.sertifikat') }}" class="text-decoration-none w-100">
+            <a href="{{ route('toko-buku.index') }}" class="text-decoration-none w-100">
                 <div class="card bg-gradient-primary card-img-holder text-white">
                     <div class="card-body">
                         <img src="{{ asset('assets/images/dashboard/circle.svg') }}" class="card-img-absolute" alt="circle-image" />
-                        <h4 class="font-weight-normal mb-3">Sertifikat Saya <i class="mdi mdi-certificate mdi-24px float-right"></i></h4>
-                        <p>Klik untuk melihat dan mengunduh sertifikat partisipasi Anda.</p>
-                        <h6 class="card-text">Akses Dokumen Digital</h6>
+                        <h4 class="font-weight-normal mb-3">Checkout Toko Buku <i class="mdi mdi-cart mdi-24px float-right"></i></h4>
+                        <p>Masuk ke halaman POS user untuk demo checkout buku dengan Midtrans.</p>
+                        <h6 class="card-text">Demo Payment Gateway</h6>
                     </div>
                 </div>
             </a>
