@@ -24,7 +24,7 @@ class OtpController extends Controller
         }
 
         $user = Auth::user();
-        
+
         // Logika: Hanya kirim OTP otomatis jika kolom 'otp' di database masih kosong
         // Ini mencegah pengiriman email berkali-kali saat halaman di-refresh
         if (empty($user->otp)) {
@@ -37,27 +37,27 @@ class OtpController extends Controller
 
     // 2. Fungsi Internal untuk Generate dan Kirim (Biar rapi)
     private function generateAndSendOtp($user)
-{
-    $otp = rand(100000, 999999);
-    
-    // Update ke DB dulu agar data siap
-    DB::table('users')->where('id', $user->id)->update(['otp' => $otp]);
+    {
+        $otp = rand(100000, 999999);
 
-    try {
-        Mail::raw(
-            "Kode keamanan Anda adalah: $otp",
-            function ($message) use ($user) {
-                $message->to($user->email)->subject('Verifikasi OTP Login');
-            }
-        );
-    } catch (\Exception $e) {
-        // Jika internet mati, hapus OTP di DB agar user bisa kirim ulang nanti
-        DB::table('users')->where('id', $user->id)->update(['otp' => null]);
-        
-        // Redirect balik dengan pesan error yang ramah
-        return back()->withErrors(['otp' => 'Koneksi ke server email bermasalah. Pastikan internet Anda aktif.']);
+        // Update ke DB dulu agar data siap
+        DB::table('users')->where('id', $user->id)->update(['otp' => $otp]);
+
+        try {
+            Mail::raw(
+                "Kode keamanan Anda adalah: $otp",
+                function ($message) use ($user) {
+                    $message->to($user->email)->subject('Verifikasi OTP Login');
+                }
+            );
+        } catch (\Exception $e) {
+            // Jika internet mati, hapus OTP di DB agar user bisa kirim ulang nanti
+            DB::table('users')->where('id', $user->id)->update(['otp' => null]);
+
+            // Redirect balik dengan pesan error yang ramah
+            return back()->withErrors(['otp' => 'Koneksi ke server email bermasalah. Pastikan internet Anda aktif.']);
+        }
     }
-}
 
     // 3. Tombol "Kirim Ulang OTP" di halaman verifikasi
     public function sendOtp(Request $request)
@@ -83,7 +83,7 @@ class OtpController extends Controller
             session([
                 'otp_verified' => true,
                 'user_name' => $user->name
-            ]); 
+            ]);
 
             // Hapus OTP agar tidak bisa dipakai lagi
             DB::table('users')
@@ -99,34 +99,34 @@ class OtpController extends Controller
     // --- PROTECTED MENUS (Dashboard, Sertifikat, Undangan) ---
 
     public function showDashboard()
-{
-    if (!session('otp_verified')) return redirect()->route('otp.verify.form');
-    return view('otp.dashboard');
-}
+    {
+        // if (!session('otp_verified')) return redirect()->route('otp.verify.form');
+        return view('otp.dashboard');
+    }
 
-public function showSertifikat()
-{
-    if (!session('otp_verified')) return redirect()->route('otp.verify.form');
-    
-    // User hanya mengambil data miliknya sendiri
-    $document = DB::table('documents')
-                ->where('user_id', Auth::id())
-                ->where('type', 'sertifikat')
-                ->first();
+    public function showSertifikat()
+    {
+        // if (!session('otp_verified')) return redirect()->route('otp.verify.form');
 
-    return view('otp.sertifikat', compact('document'));
-}
+        // User hanya mengambil data miliknya sendiri
+        $document = DB::table('documents')
+            ->where('user_id', Auth::id())
+            ->where('type', 'sertifikat')
+            ->first();
 
-public function showUndangan()
-{
-    if (!session('otp_verified')) return redirect()->route('otp.verify.form');
+        return view('otp.sertifikat', compact('document'));
+    }
 
-    // User hanya mengambil data miliknya sendiri
-    $document = DB::table('documents')
-                ->where('user_id', Auth::id())
-                ->where('type', 'undangan')
-                ->first();
+    public function showUndangan()
+    {
+        // if (!session('otp_verified')) return redirect()->route('otp.verify.form');
 
-    return view('otp.undangan', compact('document'));
-}
+        // User hanya mengambil data miliknya sendiri
+        $document = DB::table('documents')
+            ->where('user_id', Auth::id())
+            ->where('type', 'undangan')
+            ->first();
+
+        return view('otp.undangan', compact('document'));
+    }
 }

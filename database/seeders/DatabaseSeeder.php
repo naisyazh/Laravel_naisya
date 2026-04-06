@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
         ]);
         User::create([
             'name' => 'Hazel MpR (Admin)',
-            'email' => 'hazelmpr368@gmail.com',
+            'email' => 'hazelmpr.id@gmail.com',
             'password' => Hash::make('password123'),
             'role' => 'admin',
         ]);

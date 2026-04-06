@@ -39,7 +39,7 @@ return [
         'server_key' => env('MIDTRANS_SERVER_KEY'),
         'client_key' => env('MIDTRANS_CLIENT_KEY'),
         'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
-        'enabled_payments' => env('MIDTRANS_ENABLED_PAYMENTS', 'qris'),
+        'enabled_payments' => env('MIDTRANS_ENABLED_PAYMENTS', ''),
     ],
 
     'payment_demo' => [

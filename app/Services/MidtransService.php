@@ -36,7 +36,7 @@ class MidtransService
                     })->values()->all(),
                     'customer_details' => [
                         'first_name' => $penjualan->customer_name ?: 'Guest Customer',
-                    'email' => $penjualan->customer_email ?: Str::lower($penjualan->nomor_transaksi) . '@toko.local',
+                        'email' => $penjualan->customer_email ?: Str::lower($penjualan->nomor_transaksi) . '@toko.local',
                         'phone' => $penjualan->customer_phone ?: '-',
                     ],
                 ])
@@ -184,9 +184,9 @@ class MidtransService
         $expectedSignature = hash(
             'sha512',
             (string) ($payload['order_id'] ?? '')
-            . (string) ($payload['status_code'] ?? '')
-            . (string) ($payload['gross_amount'] ?? '')
-            . $this->serverKey()
+                . (string) ($payload['status_code'] ?? '')
+                . (string) ($payload['gross_amount'] ?? '')
+                . $this->serverKey()
         );
 
         if (! hash_equals($expectedSignature, $receivedSignature)) {
@@ -196,8 +196,8 @@ class MidtransService
 
     private function enabledPayments(): array
     {
-        return collect(explode(',', (string) config('services.midtrans.enabled_payments', 'qris')))
-            ->map(fn ($paymentMethod) => trim($paymentMethod))
+        return collect(explode(',', (string) config('services.midtrans.enabled_payments', '')))
+            ->map(fn($paymentMethod) => trim($paymentMethod))
             ->filter()
             ->values()
             ->all();
