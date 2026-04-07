@@ -45,7 +45,7 @@ class TokoController extends Controller
             'manualDemoPaymentNotice' => $this->demoManualPaymentService->configurationNotice(),
             'manualDemoBankDetails' => $this->demoManualPaymentService->bankDetails(),
             'paymentGatewayReady' => $manualDemoPaymentEnabled || $midtransConfigured,
-            'paymentButtonLabel' => $manualDemoPaymentEnabled ? 'Bayar Transfer Demo' : 'Bayar dengan QRIS Midtrans',
+            'paymentButtonLabel' => $manualDemoPaymentEnabled ? 'Bayar Transfer Demo' : 'Bayar dengan Midtrans',
             'midtransConfigured' => $midtransConfigured,
             'midtransConfigurationNotice' => $this->midtransService->configurationNotice(),
             'midtransClientKey' => config('services.midtrans.client_key'),
