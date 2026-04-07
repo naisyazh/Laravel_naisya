@@ -84,6 +84,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/toko-buku/checkout', [TokoController::class, 'checkout'])
             ->name('toko-buku.checkout');
 
+        Route::get('/toko-buku/orders/lunas', [TokoController::class, 'paidOrders'])
+            ->name('toko-buku.orders.paid');
+
         Route::get('/toko-buku/orders/{penjualan:nomor_transaksi}', [TokoController::class, 'show'])
             ->name('toko-buku.orders.show');
 

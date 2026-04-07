@@ -37,7 +37,8 @@
                                 {{ $penjualan->paymentStatusLabel() }}
                             </span>
                             <div class="mt-3 d-flex gap-2 justify-content-lg-end flex-wrap">
-                                <a href="{{ route('toko-buku.index') }}" class="btn btn-light text-primary">Kembali ke POS</a>
+                                <a href="{{ route('toko-buku.index') }}" class="btn btn-light text-primary">Kembali ke
+                                    POS</a>
                                 @if ($isManualDemoOrder)
                                     @if ($penjualan->payment_status === 'pending')
                                         <button type="button" class="btn btn-warning" id="confirm_demo_payment"
@@ -46,10 +47,6 @@
                                         </button>
                                     @endif
                                 @else
-                                    <button type="button" class="btn btn-warning" id="refresh_status"
-                                        data-url="{{ route('toko-buku.orders.refresh', $penjualan->nomor_transaksi) }}">
-                                        Periksa Status
-                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -98,7 +95,7 @@
                     <h4 class="card-title">Ringkasan Pembayaran</h4>
                     <div class="mb-3">
                         <small class="text-muted d-block">User</small>
-                        <strong>{{ $penjualan->customer_name ?? $penjualan->user?->name ?? '-' }}</strong>
+                        <strong>{{ $penjualan->customer_name ?? ($penjualan->user?->name ?? '-') }}</strong>
                     </div>
                     <div class="mb-3">
                         <small class="text-muted d-block">Email</small>
@@ -122,7 +119,7 @@
                         @foreach ($paymentInstructions as $instruction)
                             <div class="border rounded p-3 mb-2">
                                 <small class="text-muted d-block">{{ $instruction['label'] }}</small>
-                                @if (! empty($instruction['is_url']))
+                                @if (!empty($instruction['is_url']))
                                     <a href="{{ $instruction['value'] }}" target="_blank" rel="noopener">
                                         {{ $instruction['value'] }}
                                     </a>
@@ -134,10 +131,10 @@
                     @else
                         <p class="text-muted mb-0">
                             @if ($isManualDemoOrder)
-                                Transfer ke rekening demo di atas, lalu klik <strong>Saya Sudah Transfer</strong> agar status berubah menjadi sedang diproses.
+                                Transfer ke rekening demo di atas, lalu klik <strong>Saya Sudah Transfer</strong> agar
+                                status berubah menjadi sedang diproses.
                             @else
-                                Jika popup QRIS Midtrans tadi ditutup atau pembayaran baru saja selesai, klik
-                                <strong>Periksa Status</strong> untuk sinkronisasi terbaru.
+                                Pembayaran diproses otomatis oleh sistem.
                             @endif
                         </p>
                     @endif

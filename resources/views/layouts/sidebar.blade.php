@@ -86,10 +86,16 @@
                     FITUR USER
                 </div>
             </li>
-            <li class="nav-item {{ Request::is('toko-buku*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('toko-buku') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('toko-buku.index') }}">
                     <span class="menu-title">Checkout Toko Buku</span>
                     <i class="mdi mdi-cart menu-icon text-warning"></i>
+                </a>
+            </li>
+            <li class="nav-item {{ Request::is('toko-buku/orders/lunas*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('toko-buku.orders.paid') }}">
+                    <span class="menu-title">Riwayat Lunas</span>
+                    <i class="mdi mdi-receipt-text-check menu-icon text-success"></i>
                 </a>
             </li>
             <li class="nav-item {{ Request::is('tugas-js') ? 'active' : '' }}">

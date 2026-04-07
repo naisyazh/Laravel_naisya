@@ -20,8 +20,7 @@ class TokoController extends Controller
         private readonly MidtransService $midtransService,
         private readonly PaymentInstructionService $paymentInstructionService,
         private readonly DemoManualPaymentService $demoManualPaymentService,
-    ) {
-    }
+    ) {}
 
     public function index(): View
     {
@@ -86,7 +85,7 @@ class TokoController extends Controller
 
         $groupedItems = collect($validated['items'])
             ->groupBy('kode')
-            ->map(fn ($items) => (int) collect($items)->sum('jumlah'));
+            ->map(fn($items) => (int) collect($items)->sum('jumlah'));
 
         $menus = Barang::query()
             ->where('is_active', true)
@@ -195,6 +194,30 @@ class TokoController extends Controller
             'penjualan' => $penjualan,
             'isManualDemoOrder' => $this->demoManualPaymentService->isManualDemoOrder($penjualan),
             'paymentInstructions' => $this->paymentInstructionService->build($penjualan),
+        ]);
+    }
+
+    public function paidOrders(Request $request): View
+    {
+        abort_unless($request->user()->role === 'user', 403);
+
+        $baseQuery = Penjualan::query()
+            ->where('user_id', $request->user()->id)
+            ->where('payment_status', 'paid');
+
+        $orders = (clone $baseQuery)
+            ->with(['items', 'vendor'])
+            ->orderByDesc('paid_at')
+            ->orderByDesc('id')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('toko.paid-orders', [
+            'orders' => $orders,
+            'paidStats' => [
+                'count' => (clone $baseQuery)->count(),
+                'total' => (int) (clone $baseQuery)->sum('total'),
+            ],
         ]);
     }
 
