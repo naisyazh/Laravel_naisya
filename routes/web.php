@@ -9,6 +9,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\MidtransNotificationController;
 use App\Http\Controllers\TokoController;
@@ -93,6 +94,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/toko-buku/orders/{penjualan:nomor_transaksi}/confirm-demo-payment', [TokoController::class, 'confirmDemoPayment'])
             ->name('toko-buku.orders.confirm-demo-payment');
 
+        Route::post('/toko-buku/orders/{penjualan:nomor_transaksi}/record-snap-result', [TokoController::class, 'recordSnapResult'])
+            ->name('toko-buku.orders.record-snap-result');
+
         Route::post('/toko-buku/orders/{penjualan:nomor_transaksi}/refresh-status', [TokoController::class, 'refreshStatus'])
             ->name('toko-buku.orders.refresh');
     });
@@ -115,6 +119,23 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/vendor/orders/{penjualan:nomor_transaksi}/mark-paid', [VendorOrderController::class, 'markPaid'])
             ->name('vendor.orders.mark-paid');
+
+        Route::prefix('customers')->name('customers.')->group(function () {
+            Route::get('/', [CustomerController::class, 'index'])
+                ->name('index');
+
+            Route::get('/create-blob', [CustomerController::class, 'createBlob'])
+                ->name('create.blob');
+
+            Route::post('/create-blob', [CustomerController::class, 'storeBlob'])
+                ->name('store.blob');
+
+            Route::get('/create-file', [CustomerController::class, 'createFile'])
+                ->name('create.file');
+
+            Route::post('/create-file', [CustomerController::class, 'storeFile'])
+                ->name('store.file');
+        });
 
 
         Route::resource('barang', BarangController::class)

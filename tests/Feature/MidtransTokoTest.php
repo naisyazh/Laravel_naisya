@@ -268,6 +268,55 @@ class MidtransTokoTest extends TestCase
         ]);
     }
 
+    public function test_user_can_record_snap_success_result_directly_from_frontend_callback(): void
+    {
+        config()->set('services.payment_demo.enabled', false);
+        config()->set('services.midtrans.server_key', 'SB-Mid-server-test');
+        config()->set('services.midtrans.client_key', 'SB-Mid-client-test');
+        config()->set('services.midtrans.is_production', false);
+
+        $vendor = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $customer = User::factory()->create([
+            'role' => 'user',
+        ]);
+
+        $order = Penjualan::create([
+            'nomor_transaksi' => 'TRX-SNAP-4004',
+            'user_id' => $customer->id,
+            'vendor_id' => $vendor->id,
+            'customer_name' => 'Customer Callback',
+            'customer_email' => 'customer-callback@example.test',
+            'total' => 82000,
+            'payment_status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($customer)->postJson(route('toko-buku.orders.record-snap-result', $order->nomor_transaksi), [
+            'order_id' => $order->nomor_transaksi,
+            'transaction_status' => 'capture',
+            'payment_type' => 'credit_card',
+            'transaction_id' => 'trx-midtrans-frontend-001',
+            'fraud_status' => 'accept',
+            'status_message' => 'Credit card transaction is successful',
+            'gross_amount' => '82000.00',
+            'settlement_time' => now()->format('Y-m-d H:i:s'),
+        ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.payment_status', 'paid')
+            ->assertJsonPath('data.payment_status_label', 'Lunas');
+
+        $this->assertDatabaseHas('penjualans', [
+            'id' => $order->id,
+            'payment_status' => 'paid',
+            'payment_type' => 'credit_card',
+            'midtrans_transaction_status' => 'capture',
+        ]);
+    }
+
     public function test_manual_demo_checkout_can_move_from_pending_to_processing_to_paid(): void
     {
         config()->set('services.payment_demo.enabled', true);
@@ -329,5 +378,46 @@ class MidtransTokoTest extends TestCase
             'payment_status' => 'paid',
             'payment_type' => 'manual_transfer_demo',
         ]);
+    }
+
+    public function test_paid_customer_order_detail_displays_qr_order_panel(): void
+    {
+        $vendor = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $customer = User::factory()->create([
+            'role' => 'user',
+        ]);
+
+        $order = Penjualan::create([
+            'nomor_transaksi' => 'TRX-QR-1001',
+            'user_id' => $customer->id,
+            'vendor_id' => $vendor->id,
+            'customer_name' => 'Customer QR',
+            'customer_email' => 'customer-qr@example.test',
+            'total' => 65000,
+            'payment_status' => 'paid',
+            'payment_type' => 'qris',
+            'status_message' => 'Settlement success',
+            'paid_at' => now(),
+        ]);
+
+        $order->items()->create([
+            'barang_id' => 'BRG77777',
+            'nama_barang' => 'Bumi Manusia',
+            'harga' => 65000,
+            'jumlah' => 1,
+            'subtotal' => 65000,
+        ]);
+
+        $response = $this->actingAs($customer)->get(route('toko-buku.orders.show', $order->nomor_transaksi));
+
+        $response
+            ->assertOk()
+            ->assertSee('QR Pesanan')
+            ->assertSee('TRX-QR-1001')
+            ->assertSee('order_qr_code', false)
+            ->assertSee('qrcode.min.js', false);
     }
 }

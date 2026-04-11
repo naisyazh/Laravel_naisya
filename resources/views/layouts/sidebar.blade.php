@@ -66,6 +66,30 @@
                     <i class="mdi mdi-format-list-bulleted menu-icon text-success"></i>
                 </a>
             </li>
+            <li class="nav-item">
+                <div class="sidebar-heading"
+                    style="padding: 15px 15px 5px 25px; font-size: 11px; font-weight: bold; color: #afafaf;">
+                    MODUL CUSTOMER
+                </div>
+            </li>
+            <li class="nav-item {{ Request::is('customers') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('customers.index') }}">
+                    <span class="menu-title">Data Customer</span>
+                    <i class="mdi mdi-account-multiple menu-icon text-primary"></i>
+                </a>
+            </li>
+            <li class="nav-item {{ Request::is('customers/create-blob') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('customers.create.blob') }}">
+                    <span class="menu-title">Tambah Customer 1</span>
+                    <i class="mdi mdi-database menu-icon text-info"></i>
+                </a>
+            </li>
+            <li class="nav-item {{ Request::is('customers/create-file') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('customers.create.file') }}">
+                    <span class="menu-title">Tambah Customer 2</span>
+                    <i class="mdi mdi-file-image menu-icon text-warning"></i>
+                </a>
+            </li>
         @endif
         <li class="nav-item {{ Request::is('buku*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('buku.index') }}">
@@ -73,12 +97,20 @@
                 <i class="mdi mdi-book-open-variant menu-icon text-info"></i>
             </a>
         </li>
-        <li class="nav-item {{ Request::is('barang*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('barang.index') }}">
-                <span class="menu-title">Master Buku Toko</span>
-                <i class="mdi mdi-tag-multiple menu-icon text-primary"></i>
-            </a>
-        </li>
+        @if (Auth::check() && Auth::user()->role == 'admin')
+            <li class="nav-item {{ Request::is('barang*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('barang.index') }}">
+                    <span class="menu-title">Master Buku Toko</span>
+                    <i class="mdi mdi-tag-multiple menu-icon text-primary"></i>
+                </a>
+            </li>
+            <li class="nav-item {{ Request::is('vendor/orders*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('vendor.orders.index') }}">
+                    <span class="menu-title">Transaksi Buku</span>
+                    <i class="mdi mdi-storefront menu-icon text-warning"></i>
+                </a>
+            </li>
+        @endif
         @if (Auth::check() && Auth::user()->role == 'user')
             <li class="nav-item">
                 <div class="sidebar-heading"

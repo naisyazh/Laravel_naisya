@@ -86,6 +86,13 @@ class MidtransService
         return $this->persistTransactionStatus($payload);
     }
 
+    public function recordClientResult(array $payload): Penjualan
+    {
+        $this->ensureConfigured();
+
+        return $this->persistTransactionStatus($payload);
+    }
+
     public function snapScriptUrl(): string
     {
         return $this->isProduction()

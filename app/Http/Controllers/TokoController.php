@@ -10,6 +10,7 @@ use App\Services\PaymentInstructionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use RuntimeException;
@@ -31,6 +32,14 @@ class TokoController extends Controller
 
         $manualDemoPaymentEnabled = $this->demoManualPaymentService->isEnabled();
         $midtransConfigured = filled(config('services.midtrans.server_key')) && filled(config('services.midtrans.client_key'));
+        $enabledPayments = collect(explode(',', (string) config('services.midtrans.enabled_payments', 'qris')))
+            ->map(fn (string $paymentMethod) => trim($paymentMethod))
+            ->filter()
+            ->values();
+        $primaryPaymentMethod = $enabledPayments->first() ?: 'qris';
+        $paymentMethodLabel = $this->paymentMethodLabel($primaryPaymentMethod);
+        $paymentMethodDescription = $this->paymentMethodDescription($primaryPaymentMethod);
+        $paymentMethodNotice = $this->paymentMethodNotice($primaryPaymentMethod);
 
         return view('toko.index', [
             'quickBooks' => $quickBooks,
@@ -45,11 +54,15 @@ class TokoController extends Controller
             'manualDemoPaymentNotice' => $this->demoManualPaymentService->configurationNotice(),
             'manualDemoBankDetails' => $this->demoManualPaymentService->bankDetails(),
             'paymentGatewayReady' => $manualDemoPaymentEnabled || $midtransConfigured,
+            'paymentButtonLabel' => $manualDemoPaymentEnabled ? 'Bayar Transfer Demo' : 'Bayar dengan ' . $paymentMethodLabel . ' Midtrans',
             'paymentButtonLabel' => $manualDemoPaymentEnabled ? 'Bayar Transfer Demo' : 'Bayar dengan Midtrans',
             'midtransConfigured' => $midtransConfigured,
             'midtransConfigurationNotice' => $this->midtransService->configurationNotice(),
             'midtransClientKey' => config('services.midtrans.client_key'),
             'midtransSnapScriptUrl' => $this->midtransService->snapScriptUrl(),
+            'midtransPaymentMethodLabel' => $paymentMethodLabel,
+            'midtransPaymentMethodDescription' => $paymentMethodDescription,
+            'midtransPaymentMethodNotice' => $paymentMethodNotice,
         ]);
     }
 
@@ -279,6 +292,40 @@ class TokoController extends Controller
         ]);
     }
 
+    public function recordSnapResult(Request $request, Penjualan $penjualan): JsonResponse
+    {
+        abort_unless($requestUser = $request->user(), 403);
+        abort_unless($requestUser->role === 'user' && $penjualan->user_id === $requestUser->id, 403);
+
+        $validated = $request->validate([
+            'order_id' => 'required|string',
+            'transaction_status' => 'nullable|string',
+            'payment_type' => 'nullable|string',
+            'transaction_id' => 'nullable|string',
+            'fraud_status' => 'nullable|string',
+            'status_message' => 'nullable|string',
+            'gross_amount' => 'nullable|string',
+            'settlement_time' => 'nullable|string',
+        ]);
+
+        if ($validated['order_id'] !== $penjualan->nomor_transaksi) {
+            return $this->errorResponse('Nomor transaksi callback tidak sesuai dengan order yang sedang dibuka.', 422);
+        }
+
+        try {
+            $penjualan = $this->midtransService->recordClientResult($validated);
+        } catch (RuntimeException $exception) {
+            return $this->errorResponse($exception->getMessage(), 422);
+        }
+
+        return $this->successResponse('Hasil pembayaran Snap berhasil direkam.', [
+            'nomor_transaksi' => $penjualan->nomor_transaksi,
+            'payment_status' => $penjualan->payment_status,
+            'payment_status_label' => $penjualan->paymentStatusLabel(),
+            'status_message' => $penjualan->status_message,
+        ]);
+    }
+
     private function successResponse(string $message, mixed $data = null, int $status = 200): JsonResponse
     {
         return response()->json([
@@ -297,5 +344,32 @@ class TokoController extends Controller
             'message' => $message,
             'errors' => $errors,
         ], $status);
+    }
+
+    private function paymentMethodLabel(string $paymentMethod): string
+    {
+        return match ($paymentMethod) {
+            'credit_card' => 'Kartu Visa/Mastercard',
+            'qris' => 'QRIS',
+            default => Str::headline(str_replace('_', ' ', $paymentMethod)),
+        };
+    }
+
+    private function paymentMethodDescription(string $paymentMethod): string
+    {
+        return match ($paymentMethod) {
+            'credit_card' => 'via kartu sandbox Midtrans seperti Visa dummy untuk demo.',
+            'qris' => 'via QRIS Midtrans.',
+            default => 'via ' . $this->paymentMethodLabel($paymentMethod) . ' Midtrans.',
+        };
+    }
+
+    private function paymentMethodNotice(string $paymentMethod): string
+    {
+        return match ($paymentMethod) {
+            'credit_card' => 'Demo checkout ini diarahkan ke kartu sandbox Midtrans. Gunakan kartu Visa dummy sandbox pada popup Snap agar pembayaran bisa sampai status berhasil.',
+            'qris' => 'Demo checkout ini dibatasi ke QRIS saja. Jika popup Snap menampilkan No payment channels available, biasanya QRIS belum aktif di akun Midtrans atau belum diaktifkan pada Settings > Snap Preferences > Payment Channels.',
+            default => 'Demo checkout ini memakai channel ' . $this->paymentMethodLabel($paymentMethod) . ' dari Midtrans.',
+        };
     }
 }

@@ -118,7 +118,7 @@
                         <h2 class="mb-3">Checkout buku langsung dari halaman POS dengan template Purple Admin.</h2>
                         <p class="mb-0">
                             User login dapat mencari buku berdasarkan kode, membuat keranjang, lalu membayar
-                            {{ $manualDemoPaymentEnabled ? 'via transfer demo ke rekening yang Anda tentukan.' : 'via QRIS Midtrans.' }}
+                            {{ $manualDemoPaymentEnabled ? 'via transfer demo ke rekening yang Anda tentukan.' : $midtransPaymentMethodDescription }}
                             Data buku diambil dari master buku toko yang dikelola admin.
                         </p>
                     </div>
@@ -149,9 +149,7 @@
             </div>
         @else
             <div class="alert alert-info">
-                Demo checkout ini dibatasi ke <strong>QRIS saja</strong>. Jika popup Snap menampilkan
-                <strong>No payment channels available</strong>, biasanya QRIS belum aktif di akun Midtrans atau belum
-                diaktifkan pada <strong>Settings &gt; Snap Preferences &gt; Payment Channels</strong>.
+                {{ $midtransPaymentMethodNotice }}
             </div>
         @endif
 
@@ -246,7 +244,7 @@
                             <div>
                                 <h4 class="card-title text-white mb-1">Keranjang Buku</h4>
                                 <p class="mb-0 text-white-50">
-                                    {{ $manualDemoPaymentEnabled ? 'Checkout user dengan transfer demo' : 'Checkout user dengan QRIS Midtrans' }}
+                                    {{ $manualDemoPaymentEnabled ? 'Checkout user dengan transfer demo' : 'Checkout user dengan ' . $midtransPaymentMethodLabel . ' Midtrans' }}
                                 </p>
                             </div>
                             <span class="badge badge-light text-dark" id="cart_count">0 item</span>
@@ -406,6 +404,35 @@
 
                     return responsePayload;
                 },
+            };
+
+            const persistSnapResult = async (orderUrl, result = {}) => {
+                if (!orderUrl || !result.order_id) {
+                    return;
+                }
+
+                try {
+                    const url = new URL(orderUrl, window.location.origin);
+                    const segments = url.pathname.split('/').filter(Boolean);
+                    const orderNumber = segments[segments.length - 1];
+
+                    if (!orderNumber) {
+                        return;
+                    }
+
+                    await transport.post(`/toko-buku/orders/${encodeURIComponent(orderNumber)}/record-snap-result`, {
+                        order_id: result.order_id,
+                        transaction_status: result.transaction_status,
+                        payment_type: result.payment_type,
+                        transaction_id: result.transaction_id,
+                        fraud_status: result.fraud_status,
+                        status_message: result.status_message,
+                        gross_amount: result.gross_amount,
+                        settlement_time: result.settlement_time,
+                    });
+                } catch (error) {
+                    console.warn('Gagal merekam hasil Snap ke backend:', error);
+                }
             };
 
             const clearSelection = () => {
@@ -613,8 +640,14 @@
                     }
 
                     window.snap.pay(payload.data.snap_token, {
-                        onSuccess: () => window.location.href = payload.data.order_url,
-                        onPending: () => window.location.href = payload.data.order_url,
+                        onSuccess: async (result) => {
+                            await persistSnapResult(payload.data.order_url, result || {});
+                            window.location.href = payload.data.order_url;
+                        },
+                        onPending: async (result) => {
+                            await persistSnapResult(payload.data.order_url, result || {});
+                            window.location.href = payload.data.order_url;
+                        },
                         onError: (result) => {
                             Swal.fire({
                                 icon: 'error',

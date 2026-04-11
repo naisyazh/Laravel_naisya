@@ -2,6 +2,34 @@
 
 @section('title', 'Detail Checkout Toko Buku')
 
+@section('style')
+    <style>
+        .order-qr-card {
+            border: 1px dashed #d8d3ee;
+            border-radius: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f7ff, #ffffff);
+        }
+
+        .order-qr-box {
+            width: 190px;
+            min-height: 190px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+            background: #fff;
+            border: 1px solid #ebe7ff;
+            box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.05);
+        }
+
+        .order-qr-box img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+@endsection
+
 @section('content')
     <div class="page-header">
         <h3 class="page-title">
@@ -28,8 +56,8 @@
                             <h4 class="font-weight-normal mb-2">Status Pembayaran Buku</h4>
                             <h2 class="mb-2">{{ $penjualan->nomor_transaksi }}</h2>
                             <p class="mb-0">
-                                Gunakan halaman ini untuk memeriksa apakah transaksi
-                                {{ $isManualDemoOrder ? 'transfer demo' : 'Midtrans' }} sudah berubah menjadi lunas.
+                                Gunakan halaman ini untuk melihat ringkasan transaksi dan status pembayaran
+                                {{ $isManualDemoOrder ? 'transfer demo' : 'Midtrans' }}.
                             </p>
                         </div>
                         <div class="text-lg-end">
@@ -138,6 +166,26 @@
                             @endif
                         </p>
                     @endif
+
+                    @if ($penjualan->payment_status === 'paid')
+                        <div class="order-qr-card mt-4">
+                            <h5 class="mb-2">QR Pesanan</h5>
+                            <p class="text-muted mb-3">
+                                QR ini berisi ID pesanan dan bisa dipakai untuk validasi cepat setelah pembayaran selesai.
+                            </p>
+                            <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+                                <div class="order-qr-box" id="order_qr_code" aria-label="QR pesanan {{ $penjualan->nomor_transaksi }}"></div>
+                                <div>
+                                    <small class="text-muted d-block">ID Pesanan</small>
+                                    <strong id="qr_order_value">{{ $penjualan->nomor_transaksi }}</strong>
+                                    <div class="text-muted small mt-2">
+                                        Status lunas pada
+                                        {{ optional($penjualan->paid_at)->format('d M Y H:i') ?? now()->format('d M Y H:i') }}.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -146,60 +194,15 @@
 
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if ($penjualan->payment_status === 'paid')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    @endif
     <script>
         (() => {
             const csrfToken = @json(csrf_token());
-            const refreshButton = document.getElementById('refresh_status');
             const confirmDemoPaymentButton = document.getElementById('confirm_demo_payment');
-            const paymentBadge = document.getElementById('payment_badge');
-
-            const refreshStatus = async (showSuccessToast = true) => {
-                if (!refreshButton) {
-                    return;
-                }
-
-                refreshButton.disabled = true;
-                refreshButton.textContent = 'Mengecek...';
-
-                try {
-                    const response = await fetch(refreshButton.dataset.url, {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'X-Requested-With': 'XMLHttpRequest',
-                        },
-                    });
-
-                    const payload = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(payload.message || 'Gagal memeriksa status pembayaran.');
-                    }
-
-                    if (showSuccessToast) {
-                        await Swal.fire({
-                            icon: 'success',
-                            title: payload.data.payment_status_label,
-                            text: 'Status pembayaran toko buku berhasil diperbarui.',
-                        });
-                    }
-
-                    window.location.reload();
-                } catch (error) {
-                    if (showSuccessToast) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Sinkronisasi gagal',
-                            text: error.message,
-                        });
-                    }
-                } finally {
-                    refreshButton.disabled = false;
-                    refreshButton.textContent = 'Periksa Status';
-                }
-            };
+            const orderQrContainer = document.getElementById('order_qr_code');
+            const orderQrValue = @json($penjualan->nomor_transaksi);
 
             const confirmDemoPayment = async () => {
                 if (!confirmDemoPaymentButton) {
@@ -245,16 +248,21 @@
                 }
             };
 
-            if (refreshButton) {
-                refreshButton.addEventListener('click', () => refreshStatus(true));
-            }
-
             if (confirmDemoPaymentButton) {
                 confirmDemoPaymentButton.addEventListener('click', confirmDemoPayment);
             }
 
-            if (refreshButton && paymentBadge.textContent.trim() === 'Menunggu Pembayaran') {
-                setTimeout(() => refreshStatus(false), 12000);
+            if (orderQrContainer && typeof QRCode !== 'undefined') {
+                orderQrContainer.innerHTML = '';
+
+                new QRCode(orderQrContainer, {
+                    text: orderQrValue,
+                    width: 168,
+                    height: 168,
+                    colorDark: '#111827',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M,
+                });
             }
         })();
     </script>

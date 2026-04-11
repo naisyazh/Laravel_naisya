@@ -3,11 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Services\Code39BarcodeService;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class BarangController extends Controller
 {
+    public function __construct(
+        private readonly Code39BarcodeService $barcodeService,
+    ) {
+    }
+
     public function index(Request $request)
     {
         $barangs = Barang::query()
@@ -98,12 +104,19 @@ class BarangController extends Controller
             return back()->with('error', 'Data tidak ditemukan.');
         }
 
+        $barangs = $barangs->map(function (Barang $barang) {
+            $barang->setAttribute('barcode_data_uri', $this->barcodeService->toDataUri($barang->id_barang));
+
+            return $barang;
+        });
+
         $skip = (($request->y - 1) * 5) + ($request->x - 1);
 
         $pdf = Pdf::loadView('barang.cetak_pdf', [
             'barangs' => $barangs,
             'skip' => $skip,
         ]);
+        
 
         return $pdf->setPaper('a4', 'portrait')
             ->stream('label-harga.pdf');

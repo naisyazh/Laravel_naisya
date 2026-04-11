@@ -15,6 +15,13 @@
             font-size: 11px;
             padding: 5px;
         }
+        .barcode {
+            display: block;
+            width: 100%;
+            height: 14mm;
+            margin: 4px auto 2px;
+            object-fit: contain;
+        }
         .harga { color: #d33; font-weight: bold; font-size: 13px; }
         .id { font-size: 9px; color: #777; }
     </style>
@@ -34,6 +41,7 @@ $counter = 0;
                 @php $item = $barangs->shift(); @endphp
                 <strong>{{ $item->nama }}</strong><br>
                 <span class="harga">Rp {{ number_format($item->harga, 0, ',', '.') }}</span><br>
+                <img src="{{ $item->barcode_data_uri }}" alt="Barcode {{ $item->id_barang }}" class="barcode">
                 <span class="id">{{ $item->id_barang }}</span>
             @endif
         </td>

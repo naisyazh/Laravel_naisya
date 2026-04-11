@@ -29,7 +29,7 @@
                             <h2 class="mb-2">{{ $penjualan->nomor_transaksi }}</h2>
                             <p class="mb-0">
                                 Admin/vendor dapat memantau pembayaran customer dan
-                                {{ $isManualDemoOrder ? 'mengonfirmasi transfer demo dari halaman ini.' : 'menyinkronkan status Midtrans dari halaman ini.' }}
+                                {{ $isManualDemoOrder ? 'mengonfirmasi transfer demo dari halaman ini.' : 'melihat status Midtrans yang sudah tercatat pada sistem.' }}
                             </p>
                         </div>
                         <div class="text-lg-end">
@@ -45,11 +45,6 @@
                                             Konfirmasi Lunas
                                         </button>
                                     @endif
-                                @else
-                                    <button type="button" class="btn btn-warning" id="refresh_status"
-                                        data-url="{{ route('vendor.orders.refresh', $penjualan->nomor_transaksi) }}">
-                                        Periksa Status Midtrans
-                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -136,7 +131,7 @@
                             @if ($isManualDemoOrder)
                                 Setelah customer mengirim transfer demo, klik <strong>Konfirmasi Lunas</strong> agar transaksi masuk ke status lunas.
                             @else
-                                Klik <strong>Periksa Status Midtrans</strong> untuk sinkronisasi status pembayaran terbaru dari sisi vendor.
+                                Status pembayaran Midtrans yang sudah masuk ke sistem akan ditampilkan pada halaman ini.
                             @endif
                         </p>
                     @endif
@@ -151,57 +146,7 @@
     <script>
         (() => {
             const csrfToken = @json(csrf_token());
-            const refreshButton = document.getElementById('refresh_status');
             const markPaidButton = document.getElementById('mark_paid');
-            const paymentBadge = document.getElementById('payment_badge');
-
-            const refreshStatus = async (showSuccessToast = true) => {
-                if (!refreshButton) {
-                    return;
-                }
-
-                refreshButton.disabled = true;
-                refreshButton.textContent = 'Mengecek...';
-
-                try {
-                    const response = await fetch(refreshButton.dataset.url, {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'X-Requested-With': 'XMLHttpRequest',
-                        },
-                    });
-
-                    const payload = await response.json();
-
-                    if (! response.ok) {
-                        throw new Error(payload.message || 'Gagal memeriksa status pembayaran.');
-                    }
-
-                    if (showSuccessToast) {
-                        await Swal.fire({
-                            icon: 'success',
-                            title: payload.data.payment_status_label,
-                            text: 'Status pembayaran vendor berhasil diperbarui.',
-                        });
-                    }
-
-                    window.location.reload();
-                } catch (error) {
-                    if (showSuccessToast) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Sinkronisasi gagal',
-                            text: error.message,
-                        });
-                    }
-                } finally {
-                    refreshButton.disabled = false;
-                    refreshButton.textContent = 'Periksa Status Midtrans';
-                }
-            };
 
             const markPaid = async () => {
                 if (!markPaidButton) {
@@ -247,16 +192,8 @@
                 }
             };
 
-            if (refreshButton) {
-                refreshButton.addEventListener('click', () => refreshStatus(true));
-            }
-
             if (markPaidButton) {
                 markPaidButton.addEventListener('click', markPaid);
-            }
-
-            if (refreshButton && paymentBadge.textContent.trim() === 'Menunggu Pembayaran') {
-                setTimeout(() => refreshStatus(false), 12000);
             }
         })();
     </script>
