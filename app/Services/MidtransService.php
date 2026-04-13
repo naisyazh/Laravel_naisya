@@ -15,31 +15,42 @@ class MidtransService
     public function createSnapTransaction(Penjualan $penjualan): array
     {
         $this->ensureConfigured();
+        $enabledPayments = $this->enabledPayments();
+        $payload = [
+            'transaction_details' => [
+                'order_id' => $penjualan->nomor_transaksi,
+                'gross_amount' => (int) $penjualan->total,
+            ],
+            'item_details' => $penjualan->items->map(function ($item) {
+                return [
+                    'id' => $item->barang_id,
+                    'price' => (int) $item->harga,
+                    'quantity' => (int) $item->jumlah,
+                    'name' => Str::limit($item->nama_barang, 50, ''),
+                ];
+            })->values()->all(),
+            'customer_details' => [
+                'first_name' => $penjualan->customer_name ?: 'Guest Customer',
+                'email' => $penjualan->customer_email ?: Str::lower($penjualan->nomor_transaksi) . '@example.test',
+                'phone' => $penjualan->customer_phone ?: '081234567890',
+            ],
+        ];
+
+        if ($enabledPayments !== []) {
+            $payload['enabled_payments'] = $enabledPayments;
+        }
+
+        if ($this->shouldEnableCreditCard3ds($enabledPayments)) {
+            $payload['credit_card'] = [
+                'secure' => true,
+            ];
+        }
 
         try {
             $response = Http::acceptJson()
                 ->asJson()
                 ->withBasicAuth($this->serverKey(), '')
-                ->post($this->apiBaseUrl() . '/snap/v1/transactions', [
-                    'transaction_details' => [
-                        'order_id' => $penjualan->nomor_transaksi,
-                        'gross_amount' => (int) $penjualan->total,
-                    ],
-                    'enabled_payments' => $this->enabledPayments(),
-                    'item_details' => $penjualan->items->map(function ($item) {
-                        return [
-                            'id' => $item->barang_id,
-                            'price' => (int) $item->harga,
-                            'quantity' => (int) $item->jumlah,
-                            'name' => Str::limit($item->nama_barang, 50, ''),
-                        ];
-                    })->values()->all(),
-                    'customer_details' => [
-                        'first_name' => $penjualan->customer_name ?: 'Guest Customer',
-                        'email' => $penjualan->customer_email ?: Str::lower($penjualan->nomor_transaksi) . '@toko.local',
-                        'phone' => $penjualan->customer_phone ?: '-',
-                    ],
-                ])
+                ->post($this->apiBaseUrl() . '/snap/v1/transactions', $payload)
                 ->throw()
                 ->json();
         } catch (ConnectionException) {
@@ -111,7 +122,7 @@ class MidtransService
                 || ! Str::startsWith($this->clientKey(), 'SB-Mid-client-');
 
             if ($usingProductionKey) {
-                return 'Aplikasi sedang mode sandbox, tetapi key yang dipakai terlihat key production. Ganti ke SB-Mid-server dan SB-Mid-client agar pembayaran sandbox bisa sampai berhasil.';
+                return 'Aplikasi sedang mode sandbox, tetapi key yang dipakai terlihat key production. Ganti ke SB-Mid-server dan SB-Mid-client, lalu jalankan php artisan config:clear agar pembayaran sandbox bisa sampai berhasil.';
             }
         }
 
@@ -120,7 +131,7 @@ class MidtransService
                 || Str::startsWith($this->clientKey(), 'SB-Mid-client-');
 
             if ($usingSandboxKey) {
-                return 'Aplikasi sedang mode production, tetapi key yang dipakai terlihat key sandbox. Samakan environment dan key Midtrans terlebih dahulu.';
+                return 'Aplikasi sedang mode production, tetapi key yang dipakai terlihat key sandbox. Samakan environment dan key Midtrans terlebih dahulu, lalu jalankan php artisan config:clear.';
             }
         }
 
@@ -204,10 +215,16 @@ class MidtransService
     private function enabledPayments(): array
     {
         return collect(explode(',', (string) config('services.midtrans.enabled_payments', '')))
-            ->map(fn($paymentMethod) => trim($paymentMethod))
+            ->map(fn($paymentMethod) => Str::lower(trim($paymentMethod)))
             ->filter()
+            ->unique()
             ->values()
             ->all();
+    }
+
+    private function shouldEnableCreditCard3ds(array $enabledPayments): bool
+    {
+        return $enabledPayments === [] || in_array('credit_card', $enabledPayments, true);
     }
 
     private function requestExceptionMessage(RequestException $exception, string $fallback): string

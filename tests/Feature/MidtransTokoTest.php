@@ -106,6 +106,106 @@ class MidtransTokoTest extends TestCase
         ]);
     }
 
+    public function test_credit_card_checkout_enables_3ds_for_snap_transaction(): void
+    {
+        config()->set('services.payment_demo.enabled', false);
+        config()->set('services.midtrans.server_key', 'SB-Mid-server-test');
+        config()->set('services.midtrans.client_key', 'SB-Mid-client-test');
+        config()->set('services.midtrans.is_production', false);
+        config()->set('services.midtrans.enabled_payments', 'credit_card');
+
+        $vendor = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        Barang::create([
+            'id_barang' => 'BRG90012',
+            'nama' => 'Clean Code',
+            'harga' => 125000,
+            'vendor_id' => $vendor->id,
+            'is_active' => true,
+        ]);
+
+        $user = User::factory()->create([
+            'role' => 'user',
+        ]);
+
+        Http::fake([
+            'https://app.sandbox.midtrans.com/snap/v1/transactions' => Http::response([
+                'token' => 'snap-token-credit-card',
+                'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/credit-card',
+            ], 201),
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('toko-buku.checkout'), [
+            'items' => [
+                ['kode' => 'BRG90012', 'jumlah' => 1],
+            ],
+        ]);
+
+        $response
+            ->assertCreated()
+            ->assertJsonPath('data.snap_token', 'snap-token-credit-card');
+
+        Http::assertSent(function ($request) {
+            $payload = json_decode($request->body(), true);
+
+            return $request->url() === 'https://app.sandbox.midtrans.com/snap/v1/transactions'
+                && ($payload['enabled_payments'] ?? null) === ['credit_card']
+                && data_get($payload, 'credit_card.secure') === true;
+        });
+    }
+
+    public function test_checkout_without_enabled_payments_does_not_send_empty_payment_channel_list(): void
+    {
+        config()->set('services.payment_demo.enabled', false);
+        config()->set('services.midtrans.server_key', 'SB-Mid-server-test');
+        config()->set('services.midtrans.client_key', 'SB-Mid-client-test');
+        config()->set('services.midtrans.is_production', false);
+        config()->set('services.midtrans.enabled_payments', '');
+
+        $vendor = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        Barang::create([
+            'id_barang' => 'BRG90013',
+            'nama' => 'Deep Work',
+            'harga' => 99000,
+            'vendor_id' => $vendor->id,
+            'is_active' => true,
+        ]);
+
+        $user = User::factory()->create([
+            'role' => 'user',
+        ]);
+
+        Http::fake([
+            'https://app.sandbox.midtrans.com/snap/v1/transactions' => Http::response([
+                'token' => 'snap-token-default-channel',
+                'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/default-channel',
+            ], 201),
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('toko-buku.checkout'), [
+            'items' => [
+                ['kode' => 'BRG90013', 'jumlah' => 1],
+            ],
+        ]);
+
+        $response
+            ->assertCreated()
+            ->assertJsonPath('data.snap_token', 'snap-token-default-channel');
+
+        Http::assertSent(function ($request) {
+            $payload = json_decode($request->body(), true);
+
+            return $request->url() === 'https://app.sandbox.midtrans.com/snap/v1/transactions'
+                && ! array_key_exists('enabled_payments', $payload)
+                && data_get($payload, 'credit_card.secure') === true;
+        });
+    }
+
     public function test_midtrans_notification_marks_order_as_paid(): void
     {
         config()->set('services.payment_demo.enabled', false);

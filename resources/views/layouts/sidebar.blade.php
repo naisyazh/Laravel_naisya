@@ -1,10 +1,23 @@
 <style>
     @media (min-width: 992px) {
+        body {
+            --app-sidebar-width: 260px;
+            --app-sidebar-icon-width: 58px;
+        }
+
+        body.sidebar-icon-only {
+            --app-sidebar-width: var(--app-sidebar-icon-width);
+        }
+
+        body.sidebar-hidden {
+            --app-sidebar-width: 0px;
+        }
+
         #sidebar {
             position: fixed;
             top: 70px;
             left: 0;
-            width: 260px;
+            width: var(--app-sidebar-width);
             height: calc(100vh - 70px);
             overflow-y: auto;
             z-index: 1000;
@@ -12,8 +25,43 @@
         }
 
         .main-panel {
-            margin-left: 260px;
-            width: calc(100% - 260px);
+            margin-left: var(--app-sidebar-width);
+            width: calc(100% - var(--app-sidebar-width));
+            transition: width 0.3s ease, margin-left 0.3s ease;
+        }
+
+        body.sidebar-icon-only .main-panel,
+        body.sidebar-hidden .main-panel {
+            margin-left: var(--app-sidebar-width);
+            width: calc(100% - var(--app-sidebar-width));
+        }
+
+        body.sidebar-icon-only .navbar .navbar-brand-wrapper {
+            width: var(--app-sidebar-icon-width);
+        }
+
+        body.sidebar-icon-only .navbar .navbar-menu-wrapper {
+            width: calc(100% - var(--app-sidebar-icon-width));
+        }
+
+        body.sidebar-icon-only #sidebar .sidebar-section-label {
+            display: none;
+        }
+
+        body.sidebar-icon-only #sidebar .nav .nav-item .nav-link {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        body.sidebar-icon-only #sidebar .nav .nav-item .nav-link .menu-icon {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        body.sidebar-icon-only #sidebar .nav .nav-item.hover-open .nav-link .menu-title,
+        body.sidebar-icon-only #sidebar .nav .nav-item.hover-open .collapse,
+        body.sidebar-icon-only #sidebar .nav .nav-item.hover-open .collapsing {
+            left: var(--app-sidebar-icon-width);
         }
     }
 
@@ -48,7 +96,7 @@
             </a>
         </li>
         @if (Auth::check() && Auth::user()->role == 'admin')
-            <li class="nav-item">
+            <li class="nav-item sidebar-section-label">
                 <div class="sidebar-heading"
                     style="padding: 15px 15px 5px 25px; font-size: 11px; font-weight: bold; color: #afafaf;">
                     ADMIN PANEL
@@ -66,7 +114,7 @@
                     <i class="mdi mdi-format-list-bulleted menu-icon text-success"></i>
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item sidebar-section-label">
                 <div class="sidebar-heading"
                     style="padding: 15px 15px 5px 25px; font-size: 11px; font-weight: bold; color: #afafaf;">
                     MODUL CUSTOMER
@@ -112,7 +160,7 @@
             </li>
         @endif
         @if (Auth::check() && Auth::user()->role == 'user')
-            <li class="nav-item">
+            <li class="nav-item sidebar-section-label">
                 <div class="sidebar-heading"
                     style="padding: 15px 15px 5px 25px; font-size: 11px; font-weight: bold; color: #afafaf;">
                     FITUR USER
@@ -136,7 +184,7 @@
                     <i class="mdi mdi-code-tags menu-icon text-primary"></i>
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item sidebar-section-label">
                 <div class="sidebar-heading"
                     style="padding: 15px 15px 5px 25px; font-size: 11px; font-weight: bold; color: #afafaf;">
                     DOKUMEN EKSKLUSIF

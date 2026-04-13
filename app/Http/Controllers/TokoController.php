@@ -40,6 +40,9 @@ class TokoController extends Controller
         $paymentMethodLabel = $this->paymentMethodLabel($primaryPaymentMethod);
         $paymentMethodDescription = $this->paymentMethodDescription($primaryPaymentMethod);
         $paymentMethodNotice = $this->paymentMethodNotice($primaryPaymentMethod);
+        $paymentButtonLabel = $manualDemoPaymentEnabled
+            ? 'Bayar Transfer Demo'
+            : 'Bayar dengan ' . $paymentMethodLabel . ' Midtrans';
 
         return view('toko.index', [
             'quickBooks' => $quickBooks,
@@ -54,8 +57,7 @@ class TokoController extends Controller
             'manualDemoPaymentNotice' => $this->demoManualPaymentService->configurationNotice(),
             'manualDemoBankDetails' => $this->demoManualPaymentService->bankDetails(),
             'paymentGatewayReady' => $manualDemoPaymentEnabled || $midtransConfigured,
-            'paymentButtonLabel' => $manualDemoPaymentEnabled ? 'Bayar Transfer Demo' : 'Bayar dengan ' . $paymentMethodLabel . ' Midtrans',
-            'paymentButtonLabel' => $manualDemoPaymentEnabled ? 'Bayar Transfer Demo' : 'Bayar dengan Midtrans',
+            'paymentButtonLabel' => $paymentButtonLabel,
             'midtransConfigured' => $midtransConfigured,
             'midtransConfigurationNotice' => $this->midtransService->configurationNotice(),
             'midtransClientKey' => config('services.midtrans.client_key'),
