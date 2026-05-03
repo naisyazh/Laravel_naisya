@@ -3,13 +3,23 @@
 @section('content')
 <div class="row">
     <div class="col-lg-12 grid-margin stretch-card">
-        <div class="card">
+            <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Master Buku Toko</h4>
-                <button type="button" class="btn btn-gradient-primary btn-fw mb-3"
-                        data-bs-toggle="modal" data-bs-target="#modalTambah">
-                    <i class="mdi mdi-plus"></i> Tambah Buku Toko
-                </button>
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+                    <div>
+                        <h4 class="card-title mb-1">Master Buku Toko</h4>
+                        <p class="text-muted mb-0">Kelola barang, cetak label barcode, lalu uji hasilnya lewat kamera scanner.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ route('barang.scanner') }}" class="btn btn-gradient-info btn-fw">
+                            <i class="mdi mdi-barcode"></i> Scan Barcode
+                        </a>
+                        <button type="button" class="btn btn-gradient-primary btn-fw"
+                                data-bs-toggle="modal" data-bs-target="#modalTambah">
+                            <i class="mdi mdi-plus"></i> Tambah Buku Toko
+                        </button>
+                    </div>
+                </div>
                 <form action="{{ route('barang.cetak') }}" method="POST">
                     @csrf
 

@@ -61,19 +61,24 @@
                     <p class="card-description mb-0">Admin dapat memantau transaksi buku yang sudah terhubung dengan master buku toko.</p>
                 </div>
 
-                <form method="GET" class="d-flex gap-2">
-                    <select name="status" class="form-select">
-                        <option value="paid" {{ $statusFilter === 'paid' ? 'selected' : '' }}>Lunas</option>
-                        <option value="pending" {{ $statusFilter === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="processing" {{ $statusFilter === 'processing' ? 'selected' : '' }}>Diproses</option>
-                        <option value="failed" {{ $statusFilter === 'failed' ? 'selected' : '' }}>Gagal</option>
-                        <option value="expired" {{ $statusFilter === 'expired' ? 'selected' : '' }}>Expired</option>
-                        <option value="cancelled" {{ $statusFilter === 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
-                        <option value="refunded" {{ $statusFilter === 'refunded' ? 'selected' : '' }}>Refund</option>
-                        <option value="all" {{ $statusFilter === 'all' ? 'selected' : '' }}>Semua</option>
-                    </select>
-                    <button type="submit" class="btn btn-gradient-primary">Filter</button>
-                </form>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ route('vendor.orders.scanner') }}" class="btn btn-gradient-info">
+                        Scan QR Pesanan
+                    </a>
+                    <form method="GET" class="d-flex gap-2">
+                        <select name="status" class="form-select">
+                            <option value="paid" {{ $statusFilter === 'paid' ? 'selected' : '' }}>Lunas</option>
+                            <option value="pending" {{ $statusFilter === 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="processing" {{ $statusFilter === 'processing' ? 'selected' : '' }}>Diproses</option>
+                            <option value="failed" {{ $statusFilter === 'failed' ? 'selected' : '' }}>Gagal</option>
+                            <option value="expired" {{ $statusFilter === 'expired' ? 'selected' : '' }}>Expired</option>
+                            <option value="cancelled" {{ $statusFilter === 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
+                            <option value="refunded" {{ $statusFilter === 'refunded' ? 'selected' : '' }}>Refund</option>
+                            <option value="all" {{ $statusFilter === 'all' ? 'selected' : '' }}>Semua</option>
+                        </select>
+                        <button type="submit" class="btn btn-gradient-primary">Filter</button>
+                    </form>
+                </div>
             </div>
 
             <div class="table-responsive">

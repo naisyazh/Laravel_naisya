@@ -10,6 +10,7 @@ use App\Http\Controllers\BukuController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\BarcodeQrController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\MidtransNotificationController;
 use App\Http\Controllers\TokoController;
@@ -38,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [OtpController::class, 'showDashboard'])
         ->name('otp.dashboard');
+
+    Route::get('/pesanan/{penjualan:nomor_transaksi}', [BarcodeQrController::class, 'showPesanan'])
+        ->name('pesanan.show');
 
     Route::get('/sertifikat', [OtpController::class, 'showSertifikat'])
         ->name('otp.sertifikat');
@@ -88,7 +92,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/toko-buku/orders/lunas', [TokoController::class, 'paidOrders'])
             ->name('toko-buku.orders.paid');
 
-        Route::get('/toko-buku/orders/{penjualan:nomor_transaksi}', [TokoController::class, 'show'])
+        Route::get('/toko-buku/orders/{penjualan:nomor_transaksi}', [BarcodeQrController::class, 'showPesanan'])
             ->name('toko-buku.orders.show');
 
         Route::post('/toko-buku/orders/{penjualan:nomor_transaksi}/confirm-demo-payment', [TokoController::class, 'confirmDemoPayment'])
@@ -102,6 +106,12 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['admin'])->group(function () {
+        Route::get('/barang/scanner', [BarcodeQrController::class, 'barangScanner'])
+            ->name('barang.scanner');
+
+        Route::get('/barang/{barang:id_barang}', [BarcodeQrController::class, 'showBarang'])
+            ->name('barang.scan.show');
+
         Route::get('/barang', [BarangController::class, 'index'])
             ->name('barang.index');
 
@@ -110,6 +120,12 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/vendor/orders', [VendorOrderController::class, 'index'])
             ->name('vendor.orders.index');
+
+        Route::get('/vendor/orders/scanner', [BarcodeQrController::class, 'vendorScanner'])
+            ->name('vendor.orders.scanner');
+
+        Route::get('/vendor/orders/lookup/{penjualan:nomor_transaksi}', [BarcodeQrController::class, 'showPesananJson'])
+            ->name('vendor.orders.lookup');
 
         Route::get('/vendor/orders/{penjualan:nomor_transaksi}', [VendorOrderController::class, 'show'])
             ->name('vendor.orders.show');

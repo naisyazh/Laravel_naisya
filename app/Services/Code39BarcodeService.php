@@ -56,12 +56,26 @@ class Code39BarcodeService
         '*' => 'nwnnwnwnn',
     ];
 
-    public function toDataUri(string $value): string
+    public function toDataUri(
+        string $value,
+        int $barHeight = 56,
+        int $narrowWidth = 3,
+        int $wideWidth = 8,
+        int $quietZone = 30
+    ): string
     {
-        return 'data:image/svg+xml;base64,' . base64_encode($this->toSvg($value));
+        return 'data:image/svg+xml;base64,' . base64_encode(
+            $this->toSvg($value, $barHeight, $narrowWidth, $wideWidth, $quietZone)
+        );
     }
 
-    public function toSvg(string $value, int $barHeight = 42, int $narrowWidth = 2, int $wideWidth = 5): string
+    public function toSvg(
+        string $value,
+        int $barHeight = 56,
+        int $narrowWidth = 3,
+        int $wideWidth = 8,
+        int $quietZone = 30
+    ): string
     {
         $value = strtoupper(trim($value));
 
@@ -71,7 +85,7 @@ class Code39BarcodeService
 
         $characters = str_split('*' . $value . '*');
         $gapWidth = $narrowWidth;
-        $currentX = 0;
+        $currentX = $quietZone;
         $bars = [];
 
         foreach ($characters as $characterIndex => $character) {
@@ -87,7 +101,7 @@ class Code39BarcodeService
 
                 if ($isBar) {
                     $bars[] = sprintf(
-                        '<rect x="%d" y="0" width="%d" height="%d" fill="#111827" />',
+                        '<rect x="%d" y="0" width="%d" height="%d" fill="#000000" shape-rendering="crispEdges" />',
                         $currentX,
                         $width,
                         $barHeight
@@ -102,9 +116,11 @@ class Code39BarcodeService
             }
         }
 
+        $totalWidth = $currentX + $quietZone;
+
         return sprintf(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="%1$d" height="%2$d" viewBox="0 0 %1$d %2$d" role="img" aria-label="Barcode %3$s">%4$s</svg>',
-            $currentX,
+            '<svg xmlns="http://www.w3.org/2000/svg" width="%1$d" height="%2$d" viewBox="0 0 %1$d %2$d" role="img" aria-label="Barcode %3$s" preserveAspectRatio="xMidYMid meet" shape-rendering="crispEdges"><rect width="100%%" height="100%%" fill="#ffffff" />%4$s</svg>',
+            $totalWidth,
             $barHeight,
             htmlspecialchars($value, ENT_QUOTES, 'UTF-8'),
             implode('', $bars)

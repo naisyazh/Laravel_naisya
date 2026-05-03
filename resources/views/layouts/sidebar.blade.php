@@ -146,16 +146,28 @@
             </a>
         </li>
         @if (Auth::check() && Auth::user()->role == 'admin')
-            <li class="nav-item {{ Request::is('barang*') ? 'active' : '' }}">
+            <li class="nav-item {{ (Request::is('barang') || Request::is('barang/*')) && !Request::is('barang/scanner') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('barang.index') }}">
                     <span class="menu-title">Master Buku Toko</span>
                     <i class="mdi mdi-tag-multiple menu-icon text-primary"></i>
                 </a>
             </li>
-            <li class="nav-item {{ Request::is('vendor/orders*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::is('barang/scanner') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('barang.scanner') }}">
+                    <span class="menu-title">Scan Barcode Barang</span>
+                    <i class="mdi mdi-barcode menu-icon text-info"></i>
+                </a>
+            </li>
+            <li class="nav-item {{ (Request::is('vendor/orders') || Request::is('vendor/orders/*')) && !Request::is('vendor/orders/scanner') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('vendor.orders.index') }}">
                     <span class="menu-title">Transaksi Buku</span>
                     <i class="mdi mdi-storefront menu-icon text-warning"></i>
+                </a>
+            </li>
+            <li class="nav-item {{ Request::is('vendor/orders/scanner') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('vendor.orders.scanner') }}">
+                    <span class="menu-title">Scan QR Pesanan</span>
+                    <i class="mdi mdi-qrcode menu-icon text-success"></i>
                 </a>
             </li>
         @endif

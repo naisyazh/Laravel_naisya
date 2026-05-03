@@ -17,6 +17,8 @@ class Code39BarcodeServiceTest extends TestCase
         $this->assertStringContainsString('<svg', $svg);
         $this->assertStringContainsString('<rect', $svg);
         $this->assertStringContainsString('aria-label="Barcode BRG00001"', $svg);
+        $this->assertStringContainsString('fill="#ffffff"', $svg);
+        $this->assertStringContainsString('shape-rendering="crispEdges"', $svg);
     }
 
     public function test_it_rejects_unsupported_characters(): void

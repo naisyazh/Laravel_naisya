@@ -8,22 +8,33 @@
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         td {
             width: 20%;
-            height: 35mm;
+            height: 38mm;
             border: 0.1pt solid #eee;
             text-align: center;
             vertical-align: middle;
-            font-size: 11px;
-            padding: 5px;
+            font-size: 10px;
+            padding: 2px 1px;
         }
-        .barcode {
+        .product-name {
+            display: block;
+            line-height: 1.2;
+        }
+        .barcode-wrap {
             display: block;
             width: 100%;
-            height: 14mm;
-            margin: 4px auto 2px;
-            object-fit: contain;
+            margin: 2px auto 1px;
+            padding: 0 1mm;
+            background: #fff;
+            box-sizing: border-box;
         }
-        .harga { color: #d33; font-weight: bold; font-size: 13px; }
-        .id { font-size: 9px; color: #777; }
+        .barcode-image {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .harga { color: #d33; font-weight: bold; font-size: 12px; }
+        .id { font-size: 9px; color: #777; display: block; margin-top: 1px; }
+        .barcode-note { font-size: 7px; color: #555; display: block; margin-top: 1px; }
     </style>
 </head>
 <body>
@@ -39,10 +50,13 @@ $counter = 0;
         <td>
             @if ($counter > $skip && $barangs->count())
                 @php $item = $barangs->shift(); @endphp
-                <strong>{{ $item->nama }}</strong><br>
+                <strong class="product-name">{{ $item->nama }}</strong>
                 <span class="harga">Rp {{ number_format($item->harga, 0, ',', '.') }}</span><br>
-                <img src="{{ $item->barcode_data_uri }}" alt="Barcode {{ $item->id_barang }}" class="barcode">
-                <span class="id">{{ $item->id_barang }}</span>
+                <div class="barcode-wrap" aria-label="Barcode master toko {{ $item->barcode_display_value }}">
+                    <img src="{{ $item->barcode_data_uri }}" alt="Barcode {{ $item->barcode_display_value }}" class="barcode-image">
+                </div>
+                <span class="id">{{ $item->barcode_display_value }}</span>
+                <span class="barcode-note">Barcode barang</span>
             @endif
         </td>
     @endfor

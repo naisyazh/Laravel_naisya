@@ -105,7 +105,14 @@ class BarangController extends Controller
         }
 
         $barangs = $barangs->map(function (Barang $barang) {
-            $barang->setAttribute('barcode_data_uri', $this->barcodeService->toDataUri($barang->id_barang));
+            $barcodeDisplayValue = strtoupper(trim($barang->id_barang));
+            $barcodePayload = preg_match('/^BRG(\d{5})$/', $barcodeDisplayValue, $matches)
+                ? $matches[1]
+                : $barcodeDisplayValue;
+
+            $barang->setAttribute('barcode_payload', $barcodePayload);
+            $barang->setAttribute('barcode_display_value', $barcodeDisplayValue);
+            $barang->setAttribute('barcode_data_uri', $this->barcodeService->toDataUri($barcodePayload, barHeight: 96));
 
             return $barang;
         });

@@ -185,7 +185,7 @@ class TokoController extends Controller
                 'payment_status' => $penjualan->payment_status,
                 'payment_mode' => 'manual_demo',
                 'redirect_only' => true,
-                'order_url' => route('toko-buku.orders.show', $penjualan->nomor_transaksi),
+                'order_url' => route('pesanan.show', $penjualan->nomor_transaksi),
             ], 201);
         }
 
@@ -195,7 +195,7 @@ class TokoController extends Controller
             'payment_status' => $penjualan->payment_status,
             'snap_token' => $penjualan->snap_token,
             'redirect_url' => $penjualan->snap_redirect_url,
-            'order_url' => route('toko-buku.orders.show', $penjualan->nomor_transaksi),
+            'order_url' => route('pesanan.show', $penjualan->nomor_transaksi),
         ], 201);
     }
 

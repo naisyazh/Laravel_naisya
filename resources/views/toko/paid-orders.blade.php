@@ -68,9 +68,9 @@
                                 <td>Rp {{ number_format($order->total, 0, ',', '.') }}</td>
                                 <td>{{ strtoupper($order->payment_type ?? '-') }}</td>
                                 <td>
-                                    <a href="{{ route('toko-buku.orders.show', $order->nomor_transaksi) }}"
+                                    <a href="{{ route('pesanan.show', $order->nomor_transaksi) }}"
                                         class="btn btn-sm btn-inverse-success">
-                                        Detail
+                                        QR Pesanan
                                     </a>
                                 </td>
                             </tr>
